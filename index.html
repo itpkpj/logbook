@@ -369,9 +369,9 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="brand">
-    <div class="brand-icon"><img src="pkpj.png" style="width: 44px; height: 44px;"></div>
-	<!-- <div class="brand-icon"><svg class="ti ti-notebook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-notebook"/></svg></div> -->
     <div>
+    <div class="brand-icon"><img src="pkpj.png" style="width: 55px; height: 55px;"></div>
+	 <!-- <div class="brand-icon"><svg class="ti ti-notebook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-notebook"/></svg></div> -->
       <div class="brand-name">Logbook PKPJ</div>
       <div class="brand-sub">Work task tracker</div>
     </div>
@@ -716,63 +716,71 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
     </div>
     <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:8px"><strong>Langkah 1:</strong> Buka Google Sheet → Extensions → Apps Script</p>
     <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:6px"><strong>Langkah 2:</strong> Tampal kod ini:</p>
-    <div class="setup-code">function doGet(e){
-  return out(JSON.stringify(getSheet('Log').getDataRange().getValues()));
+    <div class="setup-code">/* ── Paste this ENTIRE code into Apps Script, then redeploy ── */
+
+function doGet(e) {
+  return out(JSON.stringify(
+    getSheet('Log').getDataRange().getValues()
+  ));
 }
-function doPost(e){
-  const d=JSON.parse(e.postData.contents);
-  if(d.action==='add'){
+
+function doPost(e) {
+  const d = JSON.parse(e.postData.contents);
+  if (d.action === 'add') {
     getSheet('Log').appendRow([d.id,d.datetime,d.title,d.category,
       d.duration,d.tags,d.notes,d.attachUrl,d.attachName,d.claimJson||'']);
-  } else if(d.action==='delete'){
-    const sh=getSheet('Log'),r=sh.getDataRange().getValues();
-    for(let i=r.length-1;i>=1;i--)if(r[i][0]==d.id){sh.deleteRow(i+1);break;}
-  } else if(d.action==='update'){
-    const sh=getSheet('Log'),r=sh.getDataRange().getValues();
-    for(let i=r.length-1;i>=1;i--)if(r[i][0]==d.id){
-      sh.getRange(i+1,1,1,10).setValues([[d.id,d.datetime,d.title,
-        d.category,d.duration,d.tags,d.notes,d.attachUrl,d.attachName,d.claimJson||'']]);
-      break;
-    }
-  } else if(d.action==='addClaim'){
-    const sh=getSheet('Tuntutan');
-    sh.appendRow([d.logId,d.tarikh,d.nama,d.tujuan,d.dari,d.ke,
-      d.jarak,d.tollP,d.tollB,d.parking,d.hotel,d.pelbagai,d.jumlah,
-      d.bertolakP,d.tibaP,d.bertolakB,d.tibaB,new Date()]);
-  } else if(d.action==='upload'){
-    const fold=DriveApp.getFoldersByName('PKPJ Logbook').hasNext()
-      ?DriveApp.getFoldersByName('PKPJ Logbook').next()
-      :DriveApp.createFolder('PKPJ Logbook');
-    const file=fold.createFile(
+  } else if (d.action === 'delete') {
+    const sh=getSheet('Log'), r=sh.getDataRange().getValues();
+    for (let i=r.length-1;i>=1;i--)
+      if (r[i][0]==d.id) { sh.deleteRow(i+1); break; }
+  } else if (d.action === 'update') {
+    const sh=getSheet('Log'), r=sh.getDataRange().getValues();
+    for (let i=r.length-1;i>=1;i--)
+      if (r[i][0]==d.id) {
+        sh.getRange(i+1,1,1,10).setValues([[d.id,d.datetime,d.title,
+          d.category,d.duration,d.tags,d.notes,
+          d.attachUrl,d.attachName,d.claimJson||'']]);
+        break;
+      }
+  } else if (d.action === 'addClaim') {
+    getSheet('Tuntutan').appendRow([d.logId,d.tarikh,d.nama,d.tujuan,
+      d.dari,d.ke,d.jarak,d.tollP,d.tollB,d.parking,d.hotel,
+      d.pelbagai,d.jumlah,d.bertolakP,d.tibaP,d.bertolakB,d.tibaB,new Date()]);
+  } else if (d.action === 'upload') {
+    const fold = DriveApp.getFoldersByName('PKPJ Logbook').hasNext()
+      ? DriveApp.getFoldersByName('PKPJ Logbook').next()
+      : DriveApp.createFolder('PKPJ Logbook');
+    const file = fold.createFile(
       Utilities.newBlob(Utilities.base64Decode(d.data),d.mimeType,d.filename));
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK,DriveApp.Permission.VIEW);
     return out(JSON.stringify({url:file.getUrl()}));
   }
   return out('ok');
 }
-function getSheet(name){
-  const ss=SpreadsheetApp.getActiveSpreadsheet();
-  let sh=ss.getSheetByName(name);
-  if(!sh){
-    sh=ss.insertSheet(name);
-    if(name==='Log'){
-      const h=['ID','Datetime','Tajuk Tugas','Kategori','Tempoh (jam)',
+
+function getSheet(name) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(name);
+  if (!sh) {
+    sh = ss.insertSheet(name);
+    if (name === 'Log') {
+      const h = ['ID','Datetime','Tajuk Tugas','Kategori','Tempoh (jam)',
         'Tag','Nota','URL Lampiran','Nama Lampiran','Tuntutan Claim'];
       sh.appendRow(h);
-      const hdr=sh.getRange(1,1,1,h.length);
-      hdr.setBackground('#0C447C').setFontColor('#FFFFFF')
+      sh.getRange(1,1,1,h.length)
+        .setBackground('#0C447C').setFontColor('#FFFFFF')
         .setFontWeight('bold').setFontSize(11);
       sh.setFrozenRows(1);
       sh.setColumnWidths(1,10,[80,140,220,130,80,120,200,200,140,300]);
     }
-    if(name==='Tuntutan'){
-      const h=['Log ID','Tarikh','Nama Pegawai','Tujuan','Dari','Ke',
+    if (name === 'Tuntutan') {
+      const h = ['Log ID','Tarikh','Nama Pegawai','Tujuan','Dari','Ke',
         'Jarak (km)','Toll Pergi','Toll Balik','Parking','Hotel',
         'Belanja Pelbagai','Jumlah Tuntutan','Bertolak (Pergi)',
         'Tiba (Pergi)','Bertolak (Balik)','Tiba (Balik)','Dicatat Pada'];
       sh.appendRow(h);
-      const hdr=sh.getRange(1,1,1,h.length);
-      hdr.setBackground('#854F0B').setFontColor('#FFFFFF')
+      sh.getRange(1,1,1,h.length)
+        .setBackground('#854F0B').setFontColor('#FFFFFF')
         .setFontWeight('bold').setFontSize(11);
       sh.setFrozenRows(1);
       sh.setColumnWidths(1,18,[80,90,140,200,200,200,80,80,80,80,80,100,110,100,100,100,100,130]);
@@ -780,12 +788,19 @@ function getSheet(name){
   }
   return sh;
 }
-function out(s){
+
+function out(s) {
   return ContentService.createTextOutput(s)
     .setMimeType(ContentService.MimeType.JSON);
 }</div>
-    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-top:10px"><strong>Langkah 3:</strong> Deploy → Execute as: Me → Access: Anyone. Copy URL, tampal di atas, tekan Connect.</p>
-    <p style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.5">Sheet akan auto-cipta tab <code style="font-family:var(--mono);background:var(--surface2);padding:1px 4px;border-radius:4px">Log</code> dan <code style="font-family:var(--mono);background:var(--surface2);padding:1px 4px;border-radius:4px">Tuntutan</code> dengan header BM, baris header berwarna, beku baris pertama, dan lebar kolum auto.</p>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-top:10px;font-weight:600">⚠️ Deployment settings yang WAJIB betul:</p>
+    <div style="background:var(--amber-bg);border:0.5px solid var(--amber-border);border-radius:8px;padding:10px 13px;margin:8px 0;font-size:12px;color:var(--amber-dark);line-height:1.8">
+      Execute as → <strong>Me (your Gmail)</strong><br>
+      Who has access → <strong>Anyone</strong> (bukan "Anyone with Google account")<br>
+      Selepas deploy → klik <strong>Authorize access</strong> → Allow semua
+    </div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6"><strong>Langkah 3:</strong> Deploy → New deployment → settings seperti atas → Copy URL → tampal di Connect bar → tekan Connect.</p>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.5">Sheet akan auto-cipta tab <code style="font-family:var(--mono);background:var(--surface2);padding:1px 4px;border-radius:4px">Log</code> dan <code style="font-family:var(--mono);background:var(--surface2);padding:1px 4px;border-radius:4px">Tuntutan</code> dengan header BM, header berwarna, frozen row, dan lebar kolum auto.</p>
     <button class="btn btn-p" style="margin-top:14px;width:100%" onclick="closeSetup()"><svg class="ti ti-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-check"/></svg> Faham</button>
   </div>
 </div>
@@ -1548,8 +1563,12 @@ async function connectSheet() {
   if (!val) { toast('Tampal URL Apps Script anda', 'ti-alert-circle'); return; }
   sheetUrl = val; saveLocal(); toast('Menyambung…', 'ti-refresh');
   try {
-    const res = await fetch(sheetUrl, {method:'GET', mode:'cors'});
-    if (!res.ok) throw new Error();
+    /* Apps Script requires redirect following — use no explicit mode so browser handles redirects */
+    const res = await fetch(sheetUrl + '?action=get', {
+      method: 'GET',
+      redirect: 'follow'
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const rows = await res.json();
     if (Array.isArray(rows) && rows.length > 1) {
       entries = rows.slice(1).map(r => ({
@@ -1559,14 +1578,17 @@ async function connectSheet() {
       saveLocal();
     }
     setConn(true); toggleConn(); toast('Disambung & disinkron', 'ti-check'); updStats(); renderCal();
-  } catch(x) { setConn(false); toast('Sambungan gagal', 'ti-alert-circle'); }
+  } catch(x) {
+    setConn(false);
+    toast('Gagal — semak URL & deployment settings', 'ti-alert-circle');
+  }
 }
 
 async function refreshSheet() {
   if (!sheetUrl) { toast('Tiada sheet disambung', 'ti-alert-circle'); return; }
   toast('Menyegar…', 'ti-refresh');
   try {
-    const res = await fetch(sheetUrl, {method:'GET', mode:'cors'});
+    const res = await fetch(sheetUrl + '?action=get', { method:'GET', redirect:'follow' });
     const rows = await res.json();
     if (Array.isArray(rows) && rows.length > 1) {
       entries = rows.slice(1).map(r => ({
