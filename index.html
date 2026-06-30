@@ -1,943 +1,1673 @@
-﻿<!DOCTYPE html>
-<html lang="ms" data-theme="dark" data-lang="ms">
+<!DOCTYPE html>
+<html lang="ms">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Semak Nombor Kaunter</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-    <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        :root {
-            --accent: #2563eb;
-            --accent-h: #1d4ed8;
-            --accent-g: #3b82f6;
-            --green: #10b981;
-            --red: #ef4444;
-            --yellow: #f59e0b;
-            --mono: 'JetBrains Mono', monospace;
-            --radius: 16px;
-            --transition: .25s cubic-bezier(.4,0,.2,1);
-        }
-
-        [data-theme="dark"] {
-            --bg: #080c14;
-            --surface: #111827;
-            --card: #151e2e;
-            --border: #1f2d42;
-            --border2: #243346;
-            --text: #e8edf5;
-            --text2: #94a3b8;
-            --text3: #64748b;
-            --shadow: rgba(0,0,0,.6);
-            --glow: rgba(37,99,235,.15);
-        }
-
-        [data-theme="light"] {
-            --bg: #f0f4fb;
-            --surface: #ffffff;
-            --card: #ffffff;
-            --border: #d1ddf0;
-            --border2: #c0cfe8;
-            --text: #0f172a;
-            --text2: #475569;
-            --text3: #94a3b8;
-            --shadow: rgba(15,23,42,.12);
-            --glow: rgba(37,99,235,.08);
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Sora', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 32px 20px 48px;
-            transition: background var(--transition), color var(--transition);
-        }
-
-            body::before {
-                content: '';
-                position: fixed;
-                inset: 0;
-                pointer-events: none;
-                z-index: 0;
-                background: radial-gradient(ellipse 70% 40% at 20% 10%, var(--glow), transparent 60%), radial-gradient(ellipse 50% 30% at 80% 80%, rgba(99,102,241,.06), transparent 60%);
-            }
-
-        .topbar {
-            width: 100%;
-            max-width: 520px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            position: relative;
-            z-index: 10;
-            animation: fadeDown .45s ease both;
-        }
-
-        .lang-switcher {
-            display: flex;
-            gap: 4px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 99px;
-            padding: 4px;
-            box-shadow: 0 2px 8px var(--shadow);
-        }
-
-        .lang-btn {
-            border: none;
-            background: transparent;
-            color: var(--text3);
-            font-family: 'Sora', sans-serif;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 5px 10px;
-            border-radius: 99px;
-            cursor: pointer;
-            transition: all var(--transition);
-            white-space: nowrap;
-        }
-
-            .lang-btn:hover {
-                color: var(--text2);
-            }
-
-            .lang-btn.active {
-                background: var(--accent);
-                color: #fff;
-                box-shadow: 0 2px 8px rgba(37,99,235,.35);
-            }
-
-        .theme-toggle {
-            width: 40px;
-            height: 40px;
-            border: 1px solid var(--border);
-            border-radius: 50%;
-            background: var(--surface);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 17px;
-            transition: all var(--transition);
-            box-shadow: 0 2px 8px var(--shadow);
-        }
-
-            .theme-toggle:hover {
-                border-color: var(--accent);
-                transform: rotate(20deg);
-            }
-
-        .wrapper {
-            width: 100%;
-            max-width: 520px;
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            animation: fadeUp .55s ease both;
-        }
-
-        .logo-container {
-            width: 88px;
-            height: 88px;
-            border-radius: 24px;
-            background: var(--card);
-            border: 2px dashed var(--border2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            margin-bottom: 24px;
-            transition: all var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-            .logo-container::after {
-                content: '';
-                position: absolute;
-                inset: 0;
-                background: linear-gradient(135deg, rgba(37,99,235,.06), transparent);
-            }
-
-        .logo-icon {
-            font-size: 28px;
-            line-height: 1;
-        }
-
-        .logo-text {
-            font-size: 9px;
-            font-weight: 600;
-            letter-spacing: .06em;
-            text-transform: uppercase;
-            color: var(--text3);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            background: rgba(37,99,235,0.12);
-            border: 1px solid rgba(37,99,235,0.28);
-            color: #60a5fa;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: .1em;
-            text-transform: uppercase;
-            padding: 5px 14px;
-            border-radius: 99px;
-            margin-bottom: 16px;
-        }
-
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #3b82f6;
-            animation: pulse 2s infinite;
-        }
-
-        h1 {
-            font-size: clamp(24px,5vw,36px);
-            font-weight: 800;
-            letter-spacing: -.04em;
-            line-height: 1.15;
-            color: var(--text);
-            transition: color var(--transition);
-        }
-
-            h1 em {
-                font-style: normal;
-                color: var(--accent-g);
-            }
-
-        .subtitle {
-            margin-top: 10px;
-            color: var(--text2);
-            font-size: 13.5px;
-            line-height: 1.6;
-            transition: color var(--transition);
-        }
-
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 32px;
-            width: 100%;
-            box-shadow: 0 20px 60px var(--shadow);
-            transition: background var(--transition), border-color var(--transition);
-        }
-
-        .field-label {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .09em;
-            text-transform: uppercase;
-            color: var(--text3);
-            margin-bottom: 8px;
-            transition: color var(--transition);
-        }
-
-        .input-wrap {
-            position: relative;
-            margin-bottom: 14px;
-        }
-
-            .input-wrap svg {
-                position: absolute;
-                left: 15px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: var(--text3);
-                pointer-events: none;
-            }
-
-        input[type="text"] {
-            width: 100%;
-            background: var(--surface);
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius);
-            padding: 15px 15px 15px 46px;
-            font-family: var(--mono);
-            font-size: 15px;
-            color: var(--text);
-            letter-spacing: .07em;
-            outline: none;
-            transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
-        }
-
-            input[type="text"]::placeholder {
-                color: var(--text3);
-            }
-
-            input[type="text"]:focus {
-                border-color: var(--accent);
-                box-shadow: 0 0 0 3px rgba(37,99,235,.18);
-            }
-
-        .submit-btn {
-            width: 100%;
-            background: linear-gradient(135deg, var(--accent) 0%, #1e40af 100%);
-            color: #fff;
-            border: none;
-            border-radius: var(--radius);
-            padding: 15px;
-            font-family: 'Sora', sans-serif;
-            font-size: 14.5px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: opacity .2s, transform .15s, box-shadow .2s;
-            box-shadow: 0 4px 20px rgba(37,99,235,.4);
-        }
-
-            .submit-btn:hover {
-                opacity: .92;
-            }
-
-            .submit-btn:active {
-                transform: scale(.98);
-            }
-
-            .submit-btn:disabled {
-                opacity: .45;
-                cursor: not-allowed;
-            }
-
-        .spinner {
-            width: 18px;
-            height: 18px;
-            border: 2.5px solid rgba(255,255,255,.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin .7s linear infinite;
-            display: none;
-        }
-
-        .submit-btn.loading .spinner {
-            display: block;
-        }
-
-        .submit-btn.loading .btn-label {
-            display: none;
-        }
-
-        #result {
-            margin-top: 22px;
-            display: none;
-            animation: fadeUp .35s ease both;
-        }
-
-        .result-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .status-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 16px;
-        }
-
-            .status-icon.ok {
-                background: rgba(16,185,129,.15);
-                color: var(--green);
-            }
-
-            .status-icon.err {
-                background: rgba(239,68,68,.12);
-                color: var(--red);
-            }
-
-        .result-title {
-            font-weight: 700;
-            font-size: 15px;
-            color: var(--text);
-        }
-
-        .result-sub {
-            font-size: 12px;
-            color: var(--text2);
-            margin-top: 2px;
-        }
-
-        .kaunter-box {
-            background: linear-gradient(135deg, rgba(37,99,235,.14) 0%, rgba(99,102,241,.08) 100%);
-            border: 1px solid rgba(99,102,241,.3);
-            border-radius: 18px;
-            padding: 22px 24px;
-            text-align: center;
-            margin-bottom: 14px;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .kaunter-box::before {
-                content: '';
-                position: absolute;
-                top: -30px;
-                right: -30px;
-                width: 100px;
-                height: 100px;
-                border-radius: 50%;
-                background: rgba(99,102,241,.08);
-            }
-
-        .kaunter-label {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            color: #93c5fd;
-            margin-bottom: 6px;
-        }
-
-        .kaunter-num {
-            font-family: var(--mono);
-            font-size: 52px;
-            font-weight: 600;
-            color: #fff;
-            line-height: 1;
-        }
-
-        [data-theme="light"] .kaunter-num {
-            color: #1e3a8a;
-        }
-
-        .info-grid {
-            display: grid;
-            gap: 8px;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-size: 13px;
-            transition: background var(--transition), border-color var(--transition);
-        }
-
-        .info-key {
-            color: var(--text2);
-            font-weight: 500;
-            font-size: 12.5px;
-        }
-
-        .info-value {
-            font-family: var(--mono);
-            font-size: 12px;
-            color: var(--text);
-            font-weight: 600;
-            text-align: right;
-            max-width: 60%;
-            word-break: break-word;
-        }
-
-        .error-box {
-            background: rgba(239,68,68,.07);
-            border: 1px solid rgba(239,68,68,.22);
-            border-radius: 12px;
-            padding: 16px;
-            font-size: 13.5px;
-            color: #fca5a5;
-            line-height: 1.5;
-        }
-
-        /* ── KEHADIRAN SECTION ── */
-        .kehadiran-section {
-            margin-top: 20px;
-            border-top: 1px solid var(--border);
-            padding-top: 20px;
-            animation: fadeUp .4s ease both;
-        }
-
-        .kehadiran-label {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .09em;
-            text-transform: uppercase;
-            color: var(--text3);
-            margin-bottom: 12px;
-            text-align: center;
-        }
-
-        .kehadiran-question {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text);
-            text-align: center;
-            margin-bottom: 16px;
-            line-height: 1.5;
-        }
-
-        .kehadiran-btns {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-ya {
-            flex: 1;
-            background: linear-gradient(135deg, #059669, #047857);
-            color: #fff;
-            border: none;
-            border-radius: var(--radius);
-            padding: 14px;
-            font-family: 'Sora', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: opacity .2s, transform .15s;
-            box-shadow: 0 4px 16px rgba(5,150,105,.35);
-        }
-
-            .btn-ya:hover {
-                opacity: .9;
-            }
-
-            .btn-ya:active {
-                transform: scale(.97);
-            }
-
-            .btn-ya:disabled {
-                opacity: .4;
-                cursor: not-allowed;
-            }
-
-        .btn-tidak {
-            flex: 1;
-            background: var(--surface);
-            color: var(--text2);
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius);
-            padding: 14px;
-            font-family: 'Sora', sans-serif;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all .2s;
-        }
-
-            .btn-tidak:hover {
-                border-color: var(--red);
-                color: var(--red);
-            }
-
-        .sudah-hadir-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background: rgba(16,185,129,.12);
-            border: 1px solid rgba(16,185,129,.3);
-            border-radius: 12px;
-            padding: 14px;
-            color: var(--green);
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .kehadiran-result {
-            margin-top: 12px;
-            border-radius: 12px;
-            padding: 14px;
-            font-size: 13.5px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-            .kehadiran-result.ok {
-                background: rgba(16,185,129,.1);
-                border: 1px solid rgba(16,185,129,.25);
-                color: #6ee7b7;
-            }
-
-            .kehadiran-result.err {
-                background: rgba(239,68,68,.08);
-                border: 1px solid rgba(239,68,68,.22);
-                color: #fca5a5;
-            }
-
-        .footer {
-            margin-top: 24px;
-            font-size: 11px;
-            color: var(--text3);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            transition: color var(--transition);
-        }
-
-            .footer span {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-            }
-
-        .fdot {
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: var(--text3);
-        }
-
-        @keyframes fadeDown {
-            from {
-                opacity: 0;
-                transform: translateY(-12px)
-            }
-
-            to {
-                opacity: 1;
-                transform: none
-            }
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px)
-            }
-
-            to {
-                opacity: 1;
-                transform: none
-            }
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg)
-            }
-        }
-
-        @keyframes pulse {
-            0%,100% {
-                opacity: 1;
-                transform: scale(1)
-            }
-
-            50% {
-                opacity: .5;
-                transform: scale(.8)
-            }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Logbook PKPJ</title>
+<script>
+(function(){
+  const t = localStorage.getItem('lb6_theme');
+  if (t && t !== 'auto') document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg: #f5f5f3;
+  --surface: #ffffff;
+  --surface2: #f0efeb;
+  --border: rgba(0,0,0,0.10);
+  --border-strong: rgba(0,0,0,0.18);
+  --text: #0b0b0a;
+  --text2: #52514e;
+  --text3: #898781;
+  --blue: #378ADD; --blue-bg: #E6F1FB; --blue-dark: #0C447C; --blue-border: #B5D4F4;
+  --purple: #7F77DD; --purple-bg: #EEEDFE; --purple-dark: #3C3489; --purple-border: #CECBF6;
+  --teal: #1D9E75; --teal-bg: #E1F5EE; --teal-dark: #085041; --teal-border: #9FE1CB;
+  --amber: #BA7517; --amber-bg: #FAEEDA; --amber-dark: #633806; --amber-border: #FAC775;
+  --coral: #D85A30; --coral-bg: #FAECE7; --coral-dark: #712B13; --coral-border: #F5C4B3;
+  --green: #639922; --green-bg: #EAF3DE; --green-dark: #27500A; --green-border: #C0DD97;
+  --pink: #D4537E; --pink-bg: #FBEAF0; --pink-dark: #72243E; --pink-border: #F4C0D1;
+  --violet: #9B59D0; --violet-bg: #F3E8FF; --violet-dark: #5B1A6E; --violet-border: #DBA8F5;
+  --gray-bg: #F1EFE8; --gray-dark: #444441; --gray-border: #D3D1C7;
+  --radius: 10px; --radius-lg: 12px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "SF Mono", "Fira Code", monospace;
+  --nav-h: 60px;
+}
+/* Dark vars — applied via [data-theme="dark"] or system preference when auto */
+.dark-vars {
+  --bg: #141413; --surface: #1e1e1c; --surface2: #252523;
+  --border: rgba(255,255,255,0.10); --border-strong: rgba(255,255,255,0.18);
+  --text: #f0ede8; --text2: #b8b5ae; --text3: #73716c;
+  --blue-bg: #0d2035; --purple-bg: #1a1640; --teal-bg: #0a2018;
+  --amber-bg: #251a04; --coral-bg: #2a1009; --green-bg: #111f04;
+  --pink-bg: #251028; --violet-bg: #1e0c28; --gray-bg: #1e1d1a;
+}
+html[data-theme="dark"] { --bg: #141413; --surface: #1e1e1c; --surface2: #252523;
+  --border: rgba(255,255,255,0.10); --border-strong: rgba(255,255,255,0.18);
+  --text: #f0ede8; --text2: #b8b5ae; --text3: #73716c;
+  --blue-bg: #0d2035; --purple-bg: #1a1640; --teal-bg: #0a2018;
+  --amber-bg: #251a04; --coral-bg: #2a1009; --green-bg: #111f04;
+  --pink-bg: #251028; --violet-bg: #1e0c28; --gray-bg: #1e1d1a; }
+html[data-theme="light"] { --bg: #f5f5f3; --surface: #ffffff; --surface2: #f0efeb;
+  --border: rgba(0,0,0,0.10); --border-strong: rgba(0,0,0,0.18);
+  --text: #0b0b0a; --text2: #52514e; --text3: #898781;
+  --blue-bg: #E6F1FB; --purple-bg: #EEEDFE; --teal-bg: #E1F5EE;
+  --amber-bg: #FAEEDA; --coral-bg: #FAECE7; --green-bg: #EAF3DE;
+  --pink-bg: #FBEAF0; --violet-bg: #F3E8FF; --gray-bg: #F1EFE8; }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]):not([data-theme="dark"]) {
+    --bg: #141413; --surface: #1e1e1c; --surface2: #252523;
+    --border: rgba(255,255,255,0.10); --border-strong: rgba(255,255,255,0.18);
+    --text: #f0ede8; --text2: #b8b5ae; --text3: #73716c;
+    --blue-bg: #0d2035; --purple-bg: #1a1640; --teal-bg: #0a2018;
+    --amber-bg: #251a04; --coral-bg: #2a1009; --green-bg: #111f04;
+    --pink-bg: #251028; --violet-bg: #1e0c28; --gray-bg: #1e1d1a;
+  }
+}
+/* Theme toggle button */
+.theme-btn { width: 34px; height: 34px; border-radius: 10px; border: 0.5px solid var(--border-strong); background: var(--surface2); cursor: pointer; color: var(--text2); display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; transition: background 0.15s; }
+.theme-btn:active { opacity: 0.7; }
+/* Theme menu */
+.theme-menu { position: absolute; top: 56px; right: 14px; background: var(--surface); border: 0.5px solid var(--border-strong); border-radius: var(--radius-lg); box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 200; min-width: 160px; overflow: hidden; display: none; }
+.theme-menu.open { display: block; }
+.theme-opt { display: flex; align-items: center; gap: 10px; padding: 12px 14px; font-size: 14px; color: var(--text); cursor: pointer; border: none; background: none; width: 100%; font-family: var(--font); border-bottom: 0.5px solid var(--border); }
+.theme-opt:last-child { border-bottom: none; }
+.theme-opt:active { background: var(--surface2); }
+.theme-opt.active { color: var(--blue-dark); background: var(--blue-bg); }
+.theme-opt i { font-size: 18px; }
+.topbar-right { display: flex; align-items: center; gap: 7px; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); font-family: var(--font); color: var(--text); font-size: 15px; }
+body { display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; min-height: 100vh; }
+
+/* ── Layout ── */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 10px; background: var(--surface); border-bottom: 0.5px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.brand { display: flex; align-items: center; gap: 9px; }
+.brand-icon { width: 36px; height: 36px; background: var(--text); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.brand-name { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.brand-sub { font-size: 11px; color: var(--text3); }
+.conn-pill { display: flex; align-items: center; gap: 5px; padding: 7px 11px; border-radius: 20px; border: 0.5px solid var(--border-strong); font-size: 12px; color: var(--text2); cursor: pointer; background: var(--surface2); white-space: nowrap; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #bbb; flex-shrink: 0; }
+.dot.on { background: #2d9e5c; } .dot.err { background: #e24b4a; }
+
+.main-content { flex: 1; overflow-y: auto; padding-bottom: calc(var(--nav-h) + 8px); }
+.screen { display: none; } .screen.active { display: block; }
+
+.bottom-nav { display: flex; border-top: 0.5px solid var(--border); background: var(--surface); padding: 6px 0 env(safe-area-inset-bottom, 4px); position: sticky; bottom: 0; z-index: 50; }
+.bnav { flex: 1; padding: 6px 2px 4px; font-size: 10px; font-weight: 500; color: var(--text3); border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: color 0.15s; }
+.bnav i { font-size: 22px; }
+.bnav.active { color: var(--text); }
+.bnav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text); margin-top: 1px; opacity: 0; }
+.bnav.active .bnav-dot { opacity: 1; }
+
+/* ── Stats ── */
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; padding: 12px 14px; }
+.sc { background: var(--surface2); border-radius: var(--radius); padding: 11px 13px; }
+.sc-l { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+.sc-v { font-size: 22px; font-weight: 600; color: var(--text); line-height: 1; }
+.sc-s { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* ── Calendar ── */
+.cal-hdr { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px 8px; }
+.cal-m { font-size: 17px; font-weight: 600; color: var(--text); }
+.cal-y { font-size: 13px; color: var(--text2); margin-left: 5px; }
+.cal-navs { display: flex; gap: 5px; align-items: center; }
+.nb { width: 34px; height: 34px; border-radius: 10px; border: 0.5px solid var(--border-strong); background: none; cursor: pointer; color: var(--text2); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+.today-btn { height: 34px; padding: 0 10px; border-radius: 10px; border: 0.5px solid var(--border-strong); background: none; cursor: pointer; color: var(--text2); font-size: 11px; font-weight: 600; font-family: var(--font); }
+.dow-row { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); padding: 0 14px; margin-bottom: 5px; }
+.dow { font-size: 11px; font-weight: 600; color: var(--text3); text-align: center; padding: 2px 0; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 4px; padding: 0 14px; }
+.dc { border-radius: 10px; border: 0.5px solid transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; padding: 5px 2px 4px; min-height: 52px; transition: background 0.12s, border-color 0.12s; }
+.dc:active { opacity: 0.7; }
+.dc.om .dn { color: var(--text3); }
+.dc.today { background: var(--blue-bg); border-color: var(--blue); }
+.dc.today .dn { color: var(--blue-dark); font-weight: 600; }
+.dc.sel { background: var(--blue-dark); border-color: var(--blue-dark); }
+.dc.sel .dn { color: #fff; font-weight: 600; }
+.dc.sel .day-ct { color: rgba(255,255,255,0.7); }
+.dc.has-work:not(.today):not(.sel) { border-color: var(--border-strong); }
+.dn { font-size: 14px; font-weight: 400; color: var(--text); line-height: 1; margin-bottom: 4px; }
+.dots { display: flex; gap: 2px; justify-content: center; flex-wrap: wrap; max-width: 34px; }
+.d { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.day-ct { font-size: 9px; color: var(--text3); margin-top: 2px; }
+
+/* ── Day panel ── */
+.day-panel { margin: 10px 14px 0; border-radius: var(--radius-lg); border: 0.5px solid var(--border); background: var(--surface); overflow: hidden; }
+.dp-hdr { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-bottom: 0.5px solid var(--border); background: var(--surface2); }
+.dp-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.dp-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.day-entries { display: flex; flex-direction: column; }
+.de { display: flex; gap: 8px; padding: 10px 13px; border-bottom: 0.5px solid var(--border); align-items: flex-start; }
+.de:last-child { border-bottom: none; }
+.de-bar { width: 3px; border-radius: 2px; flex-shrink: 0; align-self: stretch; }
+.de-body { flex: 1; min-width: 0; }
+.de-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.de-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.de-acts { display: flex; gap: 2px; flex-shrink: 0; }
+.de-claim-btn { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 4px 9px; background: var(--amber-bg); border: 0.5px solid var(--amber-border); border-radius: 6px; font-size: 11px; font-weight: 500; color: var(--amber-dark); cursor: pointer; font-family: var(--font); }
+.de-empty { text-align: center; padding: 20px; color: var(--text3); font-size: 13px; }
+.de-empty i { font-size: 28px; display: block; margin-bottom: 5px; }
+
+/* ── Badges ── */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 0.5px solid transparent; white-space: nowrap; }
+.cat-teknikal { background: var(--blue-bg); color: var(--blue-dark); border-color: var(--blue-border); }
+.cat-prog { background: var(--purple-bg); color: var(--purple-dark); border-color: var(--purple-border); }
+.cat-email { background: var(--teal-bg); color: var(--teal-dark); border-color: var(--teal-border); }
+.cat-johor { background: var(--amber-bg); color: var(--amber-dark); border-color: var(--amber-border); }
+.cat-dok { background: var(--coral-bg); color: var(--coral-dark); border-color: var(--coral-border); }
+.cat-pej { background: var(--green-bg); color: var(--green-dark); border-color: var(--green-border); }
+.cat-luar { background: var(--pink-bg); color: var(--pink-dark); border-color: var(--pink-border); }
+.cat-knt { background: var(--violet-bg); color: var(--violet-dark); border-color: var(--violet-border); }
+.cat-oth { background: var(--gray-bg); color: var(--gray-dark); border-color: var(--gray-border); }
+.pill { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 3px; }
+.pill i { font-size: 12px; }
+.al { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--blue-dark); margin-top: 4px; padding: 3px 8px; background: var(--blue-bg); border-radius: 6px; border: 0.5px solid var(--blue-border); text-decoration: none; }
+.tag { font-size: 11px; color: var(--text2); background: var(--surface2); border: 0.5px solid var(--border); border-radius: 20px; padding: 2px 7px; }
+
+/* ── Forms ── */
+.fhdr { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 4px; }
+.fhdr-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.form-wrap { padding: 10px 14px; display: flex; flex-direction: column; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--text2); }
+.field input, .field select, .field textarea {
+  font-size: 15px; padding: 0 12px; height: 48px;
+  border-radius: var(--radius); border: 0.5px solid var(--border-strong);
+  background: var(--surface2); color: var(--text); font-family: var(--font); width: 100%;
+}
+.field textarea { padding: 11px 12px; height: auto; min-height: 70px; resize: none; line-height: 1.5; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-bg); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.form-acts { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; padding: 10px 14px 14px; border-top: 0.5px solid var(--border); }
+
+/* ── Buttons ── */
+.btn { height: 48px; padding: 0 14px; font-size: 14px; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: transparent; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font); width: 100%; font-weight: 500; transition: opacity 0.12s; }
+.btn:active { opacity: 0.7; }
+.btn-p { background: var(--text); color: var(--surface); border-color: var(--text); }
+.btn-sm { height: 36px; font-size: 12px; padding: 0 11px; width: auto; border-radius: 8px; }
+.btn-amber { background: var(--amber-bg); color: var(--amber-dark); border-color: var(--amber-border); }
+.add-btn { height: 34px; padding: 0 12px; border-radius: 8px; background: var(--text); color: var(--surface); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: var(--font); border: none; }
+
+/* ── Upload ── */
+.up-zone { border: 0.5px dashed var(--border-strong); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; background: var(--surface2); }
+.up-zone i { font-size: 24px; color: var(--text3); }
+.up-zone span { font-size: 12px; color: var(--text3); text-align: center; line-height: 1.5; }
+.up-zone input { display: none; }
+.ap { display: flex; align-items: center; gap: 8px; padding: 9px 11px; border-radius: var(--radius); background: var(--surface2); border: 0.5px solid var(--border); }
+.an { font-size: 12px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 3px; }
+.up-bar { width: 100%; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.up-bar-f { height: 100%; background: var(--blue); width: 0%; transition: width 0.3s; }
+.as-txt { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* ── Conn ── */
+.conn-card { margin: 0 14px 12px; border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); overflow: hidden; }
+.conn-p { padding: 12px 14px; display: flex; flex-direction: column; gap: 9px; }
+.conn-p input { height: 48px; font-size: 14px; padding: 0 12px; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: var(--surface2); color: var(--text); font-family: var(--font); width: 100%; }
+.cbr { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+.cn { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+/* ── List ── */
+.list-tb { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.sb { position: relative; }
+.sb i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--text3); pointer-events: none; }
+.sb input { padding-left: 36px; height: 44px; font-size: 14px; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: var(--surface2); color: var(--text); width: 100%; font-family: var(--font); }
+.fr { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 7px; }
+.fr select { height: 40px; font-size: 13px; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: var(--surface2); color: var(--text2); font-family: var(--font); padding: 0 9px; width: 100%; }
+.ta { display: flex; gap: 6px; justify-content: flex-end; }
+.entries { display: flex; flex-direction: column; }
+.ec { padding: 12px 14px; border-bottom: 0.5px solid var(--border); }
+.ec:last-child { border-bottom: none; }
+.et { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
+.etitle { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; min-width: 0; line-height: 1.35; }
+.em { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.en { font-size: 12px; color: var(--text2); line-height: 1.4; margin-top: 3px; }
+.trow { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+.claim-chip { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; padding: 3px 8px; background: var(--amber-bg); border: 0.5px solid var(--amber-border); border-radius: 6px; font-size: 11px; color: var(--amber-dark); }
+
+/* ── Claim section (inside Log tab) ── */
+.claim-banner { margin: 0 14px 12px; background: var(--amber-bg); border: 0.5px solid var(--amber-border); border-radius: var(--radius-lg); padding: 13px 14px; display: flex; align-items: flex-start; gap: 9px; }
+.claim-banner i { font-size: 20px; color: var(--amber-dark); flex-shrink: 0; margin-top: 1px; }
+.cb-title { font-size: 13px; font-weight: 600; color: var(--amber-dark); margin-bottom: 3px; }
+.cb-body { font-size: 12px; color: var(--amber); line-height: 1.5; }
+.claim-section { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); margin: 0 14px 14px; overflow: hidden; }
+.cs-hdr { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; background: var(--amber-bg); border-bottom: 0.5px solid var(--amber-border); }
+.cs-title { font-size: 13px; font-weight: 600; color: var(--amber-dark); }
+.cs-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.fare-row { display: flex; align-items: center; gap: 8px; }
+.fare-row label { font-size: 13px; color: var(--text2); flex: 1; display: flex; align-items: center; gap: 5px; }
+.fare-row label i { font-size: 14px; color: var(--text3); }
+.fare-row input { width: 110px; height: 44px; font-size: 14px; padding: 0 11px; border-radius: 8px; border: 0.5px solid var(--border-strong); background: var(--surface2); color: var(--text); font-family: var(--font); flex-shrink: 0; }
+.fare-row input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-bg); }
+
+/* ── Claim output ── */
+.claim-out { margin: 0 14px 14px; border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); display: none; }
+.claim-out.show { display: block; }
+.co-hdr { background: var(--blue-dark); padding: 11px 14px; }
+.co-hdr-title { font-size: 13px; font-weight: 600; color: #fff; }
+.co-hdr-sub { font-size: 11px; color: var(--blue-border); margin-top: 2px; }
+.trip-row { border-bottom: 0.5px solid var(--border); }
+.trip-row:last-of-type { border-bottom: none; }
+.tr-hdr { display: flex; align-items: center; gap: 7px; padding: 9px 13px; background: var(--surface2); border-bottom: 0.5px solid var(--border); }
+.tr-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.tr-badge.pergi { background: var(--teal-bg); color: var(--teal-dark); border: 0.5px solid var(--teal-border); }
+.tr-badge.balik { background: var(--amber-bg); color: var(--amber-dark); border: 0.5px solid var(--amber-border); }
+.tr-time { font-size: 12px; color: var(--text3); margin-left: auto; }
+.tc-r { display: flex; border-bottom: 0.5px solid var(--border); }
+.tc-r:last-child { border-bottom: none; }
+.tc-lbl { font-size: 11px; color: var(--text3); padding: 8px 13px; width: 88px; flex-shrink: 0; }
+.tc-val { font-size: 13px; color: var(--text); padding: 8px 10px 8px 0; flex: 1; line-height: 1.5; }
+.sum-title { padding: 9px 13px 4px; font-size: 12px; font-weight: 600; color: var(--text2); border-top: 0.5px solid var(--border); }
+.sum-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 13px; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+.sum-row:last-child { border-bottom: none; }
+.sum-row.total { background: var(--surface2); font-weight: 600; }
+.sum-lbl { color: var(--text2); }
+.sum-val { color: var(--text); }
+.sum-val.zero { color: var(--text3); font-weight: 400; }
+.sum-val.highlight { color: var(--blue-dark); }
+
+/* ── Chart ── */
+.chart-w { padding: 14px; }
+.ct { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+.leg { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+.li { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text2); }
+.ld { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── Laporan ── */
+.sum-p { padding: 14px; display: flex; flex-direction: column; gap: 11px; }
+.sum-out { border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 12px; color: var(--text); line-height: 1.75; min-height: 80px; background: var(--surface2); white-space: pre-wrap; font-family: var(--mono); }
+.cr { display: flex; justify-content: flex-end; gap: 7px; }
+
+/* ── Setup overlay ── */
+.setup-ov { display: none; min-height: 520px; background: rgba(0,0,0,0.45); align-items: flex-end; }
+.setup-ov.open { display: flex; }
+.setup-sh { background: var(--surface); border-radius: 16px 16px 0 0; padding: 1.25rem; width: 100%; max-height: 80vh; overflow-y: auto; }
+.setup-code { background: var(--surface2); border-radius: var(--radius); padding: 11px; font-family: var(--mono); font-size: 10px; line-height: 1.7; color: var(--text); overflow-x: auto; margin: 8px 0; white-space: pre; }
+
+/* ── Toast ── */
+.toast-wrap { padding: 4px 14px 6px; }
+.toast { background: var(--text); color: var(--surface); padding: 11px 14px; border-radius: var(--radius); font-size: 13px; opacity: 0; transform: translateY(4px); transition: all 0.22s; display: flex; align-items: center; gap: 7px; }
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── Ib icon button ── */
+.ib { width: 34px; height: 34px; border: none; background: none; cursor: pointer; color: var(--text3); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.ib:active { background: var(--surface2); }
+
+/* ── Divider ── */
+.divider { height: 0.5px; background: var(--border); margin: 0 14px; }
+.empty { text-align: center; padding: 2.5rem 1rem; color: var(--text3); }
+.empty i { font-size: 32px; display: block; margin-bottom: 6px; }
+.empty p { font-size: 13px; }
+
+/* ── Inline SVG icons ── */
+svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; overflow:visible; flex-shrink:0; }
+/* Brand icon — SVG needs explicit size + white stroke inside dark background */
+.brand-icon svg.ti { width:20px; height:20px; color:var(--surface); stroke:var(--surface); vertical-align:middle; }
+/* Theme button icon */
+.theme-btn svg.ti { width:18px; height:18px; }
+/* Bottom nav icons */
+.bnav svg.ti { width:22px; height:22px; display:block; }
+/* Icon buttons */
+.ib svg.ti { width:16px; height:16px; }
+/* Add button */
+.add-btn svg.ti { width:14px; height:14px; }
+/* Small inline pill icons */
+.pill svg.ti { width:12px; height:12px; vertical-align:-0.1em; }
+/* Attachment zone upload icon */
+.up-zone svg.ti { width:24px; height:24px; }
+</style>
 </head>
 <body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<symbol id="ti-notebook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-11a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1m3 0v18"/><path d="M13 8h1"/><path d="M13 12h1"/></symbol>
+<symbol id="ti-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></symbol>
+<symbol id="ti-brand-whatsapp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></symbol>
+<symbol id="ti-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0"/><path d="M9 8l1 0"/><path d="M9 12l1 0"/><path d="M9 16l1 0"/><path d="M14 8l1 0"/><path d="M14 12l1 0"/><path d="M14 16l1 0"/><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16"/></symbol>
+<symbol id="ti-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/><path d="M11 15h1"/><path d="M12 15v3"/></symbol>
+<symbol id="ti-calendar-month" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/><path d="M7 14h.013"/><path d="M10.01 14h.005"/><path d="M13.01 14h.005"/><path d="M16.015 14h.005"/><path d="M13.015 17h.005"/><path d="M7.01 17h.005"/><path d="M10.01 17h.005"/></symbol>
+<symbol id="ti-calendar-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9.5 3h9.5a2 2 0 0 1 2 2v9.5"/><path d="M20 20a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12c0 -.558 .228 -1.062 .595 -1.427"/><path d="M4 11h12"/><path d="M11 4v4"/><path d="M3 3l18 18"/></symbol>
+<symbol id="ti-car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M5 17h-2v-6l2 -5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0h-6m-6 -6h15m-6 0v-5"/></symbol>
+<symbol id="ti-chart-donut" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M15 12h6"/><path d="M12 15v6"/></symbol>
+<symbol id="ti-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10"/></symbol>
+<symbol id="ti-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6"/></symbol>
+<symbol id="ti-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6"/></symbol>
+<symbol id="ti-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6"/></symbol>
+<symbol id="ti-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 7v5l3 3"/></symbol>
+<symbol id="ti-clock-hour-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 7v5l2.5 3.5"/></symbol>
+<symbol id="ti-cloud-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1"/><path d="M9 15l3 -3l3 3"/><path d="M12 12l0 9"/></symbol>
+<symbol id="ti-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z"/><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1"/></symbol>
+<symbol id="ti-device-mobile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 5a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2v-14z"/><path d="M11 4h2"/><path d="M12 17v.01"/></symbol>
+<symbol id="ti-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 11l5 5l5 -5"/><path d="M12 4l0 12"/></symbol>
+<symbol id="ti-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"/><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"/><path d="M16 5l3 3"/></symbol>
+<symbol id="ti-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/></symbol>
+<symbol id="ti-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/><path d="M9 9h1"/><path d="M9 13h6"/><path d="M9 17h6"/></symbol>
+<symbol id="ti-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M4 13h3l3 3h4l3 -3h3"/></symbol>
+<symbol id="ti-info-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></symbol>
+<symbol id="ti-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 15l6 -6"/><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"/><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"/></symbol>
+<symbol id="ti-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l11 0"/><path d="M9 12l11 0"/><path d="M9 18l11 0"/><path d="M5 6l0 .01"/><path d="M5 12l0 .01"/><path d="M5 18l0 .01"/></symbol>
+<symbol id="ti-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/></symbol>
+<symbol id="ti-paperclip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5"/></symbol>
+<symbol id="ti-parking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M9 16v-8h4a2 2 0 0 1 0 4h-4"/><path d="M9 12h4"/></symbol>
+<symbol id="ti-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9.785 6l-3.641 3.64a6 6 0 0 0 8.493 8.493l3.641 -3.641"/><path d="M14 10l-4 4"/><path d="M7 13l-1.5 1.5a3 3 0 0 0 4.243 4.243l1.5 -1.5"/><path d="M17 11l1.5 -1.5a3 3 0 0 0 -4.243 -4.243l-1.5 1.5"/></symbol>
+<symbol id="ti-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14"/><path d="M5 12l14 0"/></symbol>
+<symbol id="ti-plus-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M9 12l6 0"/><path d="M12 9l0 6"/></symbol>
+<symbol id="ti-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 21v-16a1 1 0 0 1 1 -1h12a1 1 0 0 1 1 1v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2"/><path d="M14 8h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5"/><path d="M12 8v1"/><path d="M12 15v1"/></symbol>
+<symbol id="ti-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></symbol>
+<symbol id="ti-road" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19l4 -14"/><path d="M20 19l-4 -14"/><path d="M11 5h2"/><path d="M10 9h4"/><path d="M10 13h4"/><path d="M10 17h4"/></symbol>
+<symbol id="ti-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></symbol>
+<symbol id="ti-shopping-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6.331 8h11.339a2 2 0 0 1 1.977 2.304l-1.255 8.152a3 3 0 0 1 -2.966 2.544h-6.852a3 3 0 0 1 -2.965 -2.544l-1.255 -8.152a2 2 0 0 1 1.977 -2.304z"/><path d="M9 11v-5a3 3 0 0 1 6 0v5"/></symbol>
+<symbol id="ti-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"/></symbol>
+<symbol id="ti-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></symbol>
+<symbol id="ti-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></symbol>
+<symbol id="ti-photo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/></symbol>
+<symbol id="ti-file-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4"/><path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6"/><path d="M17 18h2"/><path d="M20 15h-3v6"/><path d="M11 15a2 2 0 0 1 2 2v2a2 2 0 0 1 -4 0v-2a2 2 0 0 1 2 -2z"/></symbol>
+</svg>
 
-    <div class="topbar">
-        <div class="lang-switcher">
-            <button class="lang-btn active" onclick="setLang('ms',this)">BM</button>
-            <button class="lang-btn" onclick="setLang('en',this)">EN</button>
-            <button class="lang-btn" onclick="setLang('zh',this)">中文</button>
-            <button class="lang-btn" onclick="setLang('ta',this)">தமிழ்</button>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon"><img src="pkpj.png" style="width: 44px; height: 44px;"></div>
+	<!-- <div class="brand-icon"><svg class="ti ti-notebook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-notebook"/></svg></div> -->
+    <div>
+      <div class="brand-name">Logbook PKPJ</div>
+      <div class="brand-sub">Work task tracker</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="theme-btn" onclick="toggleThemeMenu()" aria-label="Tukar tema" id="theme-btn">
+      <svg class="ti ti-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use id="theme-icon" href="#ti-sun"/></svg>
+    </button>
+    <div class="conn-pill" onclick="toggleConn()">
+      <div class="dot" id="conn-dot"></div>
+      <span id="conn-label">Connect</span>
+      <svg class="ti ti-chevron-down" style="font-size:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-chevron-down"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- THEME MENU -->
+<div class="theme-menu" id="theme-menu">
+  <button class="theme-opt" id="opt-light" onclick="setTheme('light')">
+    <svg class="ti ti-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-sun"/></svg> Cerah (Light)
+  </button>
+  <button class="theme-opt" id="opt-dark" onclick="setTheme('dark')">
+    <svg class="ti ti-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-moon"/></svg> Gelap (Dark)
+  </button>
+  <button class="theme-opt" id="opt-auto" onclick="setTheme('auto')">
+    <svg class="ti ti-device-mobile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-device-mobile"/></svg> Auto (System)
+  </button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <!-- CONN AREA -->
+  <div id="conn-area" style="display:none; padding: 12px 0 0">
+    <div class="conn-card">
+      <div class="conn-p">
+        <input id="sheet-url" type="url" placeholder="Paste Apps Script web app URL…" />
+        <div class="cbr">
+          <button class="btn" onclick="showSetup()"><svg class="ti ti-info-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-info-circle"/></svg> Guide</button>
+          <button class="btn btn-p" onclick="connectSheet()"><svg class="ti ti-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-plug"/></svg> Connect</button>
         </div>
-        <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙</button>
+        <div class="cn">Paste your deployed Apps Script URL to sync data and upload files.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="sc"><div class="sc-l">Total tasks</div><div class="sc-v" id="s-tot">0</div></div>
+    <div class="sc"><div class="sc-l">Today</div><div class="sc-v" id="s-td">0</div></div>
+    <div class="sc"><div class="sc-l">Hours logged</div><div class="sc-v" id="s-hr">0h</div><div class="sc-s" id="s-hs"></div></div>
+    <div class="sc"><div class="sc-l">This week</div><div class="sc-v" id="s-wk">0</div></div>
+  </div>
+
+  <!-- ══ CALENDAR SCREEN ══ -->
+  <div class="screen active" id="scr-cal">
+    <div class="cal-hdr">
+      <div><span class="cal-m" id="cal-m"></span><span class="cal-y" id="cal-y"></span></div>
+      <div class="cal-navs">
+        <button class="nb" onclick="mv(-1)" aria-label="Bulan lepas"><svg class="ti ti-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-chevron-left"/></svg></button>
+        <button class="today-btn" onclick="goToday()">Hari ini</button>
+        <button class="nb" onclick="mv(1)" aria-label="Bulan depan"><svg class="ti ti-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-chevron-right"/></svg></button>
+      </div>
+    </div>
+    <div class="dow-row">
+      <div class="dow">S</div><div class="dow">I</div><div class="dow">S</div>
+      <div class="dow">R</div><div class="dow">K</div><div class="dow">J</div><div class="dow">S</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div id="day-panel" style="display:none" class="day-panel">
+      <div class="dp-hdr">
+        <div>
+          <div class="dp-title" id="dp-title"></div>
+          <div class="dp-sub" id="dp-sub"></div>
+        </div>
+        <button class="add-btn" onclick="addForDay()"><svg class="ti ti-plus" style="font-size:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-plus"/></svg> Tambah</button>
+      </div>
+      <div class="day-entries" id="day-entries"></div>
+    </div>
+    <div style="height:12px"></div>
+  </div>
+
+  <!-- ══ LOG SCREEN ══ -->
+  <div class="screen" id="scr-log">
+    <div class="fhdr">
+      <span class="fhdr-title" id="form-title">
+        <svg class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-plus"/></svg>Entry baharu
+      </span>
+      <button class="btn-sm btn" id="cancel-btn" onclick="cancelEdit()" style="display:none">
+        <svg class="ti ti-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-x"/></svg> Batal
+      </button>
     </div>
 
-    <div class="wrapper">
-        <div class="logo-container">
-            <!--<div class="logo-icon">🏛️</div>
-        <div class="logo-text" data-i18n="logo">Logo</div>-->
-            <img src="pkpj.png" style="width: 88px; height: 88px;">
+    <div class="form-wrap">
+      <div class="two">
+        <div class="field"><label>Tarikh & masa</label><input type="datetime-local" id="f-dt" /></div>
+        <div class="field"><label>Tempoh (j)</label><input type="number" id="f-dur" step="0.25" min="0.25" max="24" placeholder="1.5" /></div>
+      </div>
+      <div class="field"><label>Tajuk tugas</label><input type="text" id="f-title" placeholder="Apa yang anda kerjakan?" /></div>
+      <div class="field">
+        <label>Kategori</label>
+        <select id="f-cat" onchange="onCatChange()">
+          <option>Teknikal IT</option><option>Programming</option><option>Semakan Email</option>
+          <option>Johor Pay</option><option>Semakan Dokumen</option><option>Kerja Pejabat</option>
+          <option>Kerja Luar</option><option>Khidmat Kaunter ICT</option><option>Others</option>
+        </select>
+      </div>
+      <div class="two">
+        <div class="field"><label>Tag</label><input type="text" id="f-tags" placeholder="urgent, surat…" /></div>
+        <div class="field"><label>Nota</label><input type="text" id="f-notes" placeholder="Konteks…" /></div>
+      </div>
+      <div class="field">
+        <label>Lampiran</label>
+        <div class="up-zone" id="up-zone" onclick="document.getElementById('fi').click()" ondragover="dov(event)" ondrop="dop(event)" ondragleave="dlv()">
+          <input type="file" id="fi" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx,.xls" onchange="hf(this.files[0])" />
+          <svg class="ti ti-cloud-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-cloud-upload"/></svg>
+          <span>Tap untuk upload surat arahan, dokumen, atau gambar</span>
         </div>
-        <div class="header">
-            <div class="badge"><span class="badge-dot"></span><span data-i18n="badge">Sistem Semakan Kaunter</span></div>
-            <h1 data-i18n-html="title">Semak <em>Nombor Kaunter</em> Anda</h1>
-            <p class="subtitle" data-i18n="subtitle">Masukkan nombor IC untuk mengetahui kaunter yang ditetapkan.</p>
+        <div id="ap" style="display:none" class="ap">
+          <div style="font-size:18px;color:var(--text2);flex-shrink:0"><svg class="ti ti-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use id="a-ico" href="#ti-file"/></svg></div>
+          <div style="flex:1;min-width:0">
+            <div class="an" id="a-name"></div>
+            <div class="up-bar"><div class="up-bar-f" id="prog"></div></div>
+            <div class="as-txt" id="a-st">Uploading…</div>
+          </div>
+          <button class="ib" onclick="clrA()" aria-label="Buang lampiran"><svg class="ti ti-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-x"/></svg></button>
         </div>
-
-        <div class="card">
-            <div class="field-label" data-i18n="label">Nombor Kad Pengenalan (IC)</div>
-            <div class="input-wrap">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <rect x="2" y="5" width="20" height="14" rx="2" />
-                    <circle cx="8" cy="12" r="2" />
-                    <path stroke-linecap="round" d="M13 10h4M13 14h3" />
-                </svg>
-                <input type="text" id="icInput" maxlength="14" autocomplete="off" placeholder="cth: 900101-01-1234" />
-            </div>
-            <button class="submit-btn" id="submitBtn" onclick="lookup()">
-                <span class="btn-label" data-i18n="btnLabel">🔍 Semak Kaunter</span>
-                <div class="spinner"></div>
-            </button>
-            <div id="result"></div>
+        <div id="lf" style="display:none;margin-top:6px">
+          <input type="url" id="f-link" placeholder="Atau tampal link Google Drive / OneDrive…" style="height:44px;font-size:13px" />
         </div>
-
-        <div class="footer">
-            <span>
-                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                <span data-i18n="secure">Data selamat &amp; terenkripsi</span>
-            </span>
-            <div class="fdot"></div>
-            <span data-i18n="powered">Dikuasakan oleh Google Sheets</span>
-        </div>
+        <button onclick="toggleLF()" style="height:28px;font-size:12px;border:none;background:none;cursor:pointer;color:var(--text3);display:flex;align-items:center;gap:5px;margin-top:4px;padding:0">
+          <svg class="ti ti-link" style="font-size:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-link"/></svg> Tampal link
+        </button>
+      </div>
+    </div>
+    <div class="form-acts">
+      <button class="btn" id="cancel-btn2" onclick="cancelEdit()" style="display:none"><svg class="ti ti-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-x"/></svg> Batal</button>
+      <button class="btn btn-p" id="sub-btn" onclick="submitEntry()" style="grid-column:1/-1">
+        <svg class="ti ti-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-check"/></svg> <span id="sl">Log entry</span>
+      </button>
     </div>
 
-    <script>
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvLAfoIm0pc9hLF1CXE2OYPKmY0-U1ShccSTSQMzLbjdi2fXe7CcA2DTBP93XBJOK6EQ/exec";
+    <!-- KERJA LUAR CLAIM SECTION — shown only when category = Kerja Luar -->
+    <div id="claim-banner" class="claim-banner" style="display:none">
+      <svg class="ti ti-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-bell"/></svg>
+      <div>
+        <div class="cb-title">Peringatan tuntutan — Kerja Luar</div>
+        <div class="cb-body">Isi maklumat perjalanan di bawah untuk jana Kenyataan Tuntutan anda.</div>
+      </div>
+    </div>
 
-  const i18n = {
-    ms: {
-      badge:"Sistem Semakan Kaunter", title:"Semak <em>Nombor Kaunter</em> Anda",
-      subtitle:"Masukkan nombor IC untuk mengetahui kaunter yang ditetapkan.",
-      label:"Nombor Kad Pengenalan (IC)", placeholder:"cth: 900101-01-1234",
-      btnLabel:"🔍 Semak Kaunter", logo:"Logo",
-      secure:"Data selamat & terenkripsi", powered:"Dikuasakan oleh Google Sheets",
-      found:"Kaunter dijumpai!", foundSub:"Sila pergi ke kaunter yang ditetapkan.",
-      notFound:"IC Tidak Dijumpai", notFoundSub:"Semak semula nombor IC anda.",
-      kaunterLbl:"Nombor Kaunter Anda", keyIC:"Nombor IC", keyNama:"Nama", keyEmel:"Emel",
-      errEmpty:"Sila masukkan nombor IC anda.",
-      errServer:"Gagal menghubungi pelayan. Semak URL Apps Script.",
-      errTimeout:"Masa tamat. Cuba semula.",
-      kehadiranLabel:"Rekod Kehadiran",
-      kehadiranQuestion:"Adakah anda ingin mengesahkan kehadiran anda?",
-      btnYa:"✅ Ya, Sahkan", btnTidak:"✕ Tidak",
-      sudahHadir:"✅ Kehadiran telah direkodkan",
-      recodOk:"Kehadiran berjaya direkodkan!", recodErr:"Gagal merekod kehadiran.",
-    },
-    en: {
-      badge:"Counter Lookup System", title:"Check Your <em>Counter Number</em>",
-      subtitle:"Enter your IC number to find your assigned counter.",
-      label:"Identity Card Number (IC)", placeholder:"e.g. 900101-01-1234",
-      btnLabel:"🔍 Check Counter", logo:"Logo",
-      secure:"Data is secure & encrypted", powered:"Powered by Google Sheets",
-      found:"Counter found!", foundSub:"Please proceed to your assigned counter.",
-      notFound:"IC Not Found", notFoundSub:"Please check your IC number again.",
-      kaunterLbl:"Your Counter Number", keyIC:"IC Number", keyNama:"Name", keyEmel:"Email",
-      errEmpty:"Please enter your IC number.",
-      errServer:"Failed to reach server. Check Apps Script URL.",
-      errTimeout:"Request timed out. Please try again.",
-      kehadiranLabel:"Record Attendance",
-      kehadiranQuestion:"Would you like to confirm your attendance?",
-      btnYa:"✅ Yes, Confirm", btnTidak:"✕ No",
-      sudahHadir:"✅ Attendance already recorded",
-      recodOk:"Attendance recorded successfully!", recodErr:"Failed to record attendance.",
-    },
-    zh: {
-      badge:"柜台查询系统", title:"查询您的<em>柜台号码</em>",
-      subtitle:"请输入您的身份证号码以查询所指定的柜台。",
-      label:"身份证号码（IC）", placeholder:"例：900101-01-1234",
-      btnLabel:"🔍 查询柜台", logo:"标志",
-      secure:"数据安全 & 已加密", powered:"由 Google Sheets 驱动",
-      found:"已找到柜台！", foundSub:"请前往您指定的柜台。",
-      notFound:"未找到身份证", notFoundSub:"请再次确认您的身份证号码。",
-      kaunterLbl:"您的柜台号码", keyIC:"身份证号码", keyNama:"姓名", keyEmel:"电子邮件",
-      errEmpty:"请输入您的身份证号码。",
-      errServer:"无法连接服务器，请检查 Apps Script 网址。",
-      errTimeout:"请求超时，请再试一次。",
-      kehadiranLabel:"出席记录",
-      kehadiranQuestion:"您是否要确认出席？",
-      btnYa:"✅ 是，确认", btnTidak:"✕ 否",
-      sudahHadir:"✅ 出席已记录",
-      recodOk:"出席记录成功！", recodErr:"出席记录失败。",
-    },
-    ta: {
-      badge:"கவுண்டர் சரிபார்ப்பு அமைப்பு", title:"உங்கள் <em>கவுண்டர் எண்ணை</em> சரிபார்க்கவும்",
-      subtitle:"உங்கள் IC எண்ணை உள்ளிட்டு நியமிக்கப்பட்ட கவுண்டரை அறியவும்.",
-      label:"அடையாள அட்டை எண் (IC)", placeholder:"எ.கா: 900101-01-1234",
-      btnLabel:"🔍 கவுண்டர் சரிபார்", logo:"சின்னம்",
-      secure:"தரவு பாதுகாப்பானது & மறைகுறியாக்கப்பட்டது", powered:"Google Sheets ஆல் இயக்கப்படுகிறது",
-      found:"கவுண்டர் கண்டுபிடிக்கப்பட்டது!", foundSub:"தயவுசெய்து நியமிக்கப்பட்ட கவுண்டருக்குச் செல்லவும்.",
-      notFound:"IC கண்டுபிடிக்கப்படவில்லை", notFoundSub:"உங்கள் IC எண்ணை மீண்டும் சரிபார்க்கவும்.",
-      kaunterLbl:"உங்கள் கவுண்டர் எண்", keyIC:"IC எண்", keyNama:"பெயர்", keyEmel:"மின்னஞ்சல்",
-      errEmpty:"தயவுசெய்து உங்கள் IC எண்ணை உள்ளிடவும்.",
-      errServer:"சேவையகத்தை அடைய முடியவில்லை.",
-      errTimeout:"கோரிக்கை நேரம் முடிந்தது. மீண்டும் முயற்சிக்கவும்.",
-      kehadiranLabel:"வருகை பதிவு",
-      kehadiranQuestion:"உங்கள் வருகையை உறுதிப்படுத்த விரும்புகிறீர்களா?",
-      btnYa:"✅ ஆம், உறுதிப்படுத்து", btnTidak:"✕ இல்லை",
-      sudahHadir:"✅ வருகை ஏற்கனவே பதிவு செய்யப்பட்டது",
-      recodOk:"வருகை வெற்றிகரமாக பதிவு செய்யப்பட்டது!", recodErr:"வருகை பதிவு தோல்வியடைந்தது.",
+    <div id="claim-section" class="claim-section" style="display:none">
+      <div class="cs-hdr">
+        <span class="cs-title"><svg class="ti ti-car" style="font-size:14px;vertical-align:-2px;margin-right:5px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-car"/></svg>Maklumat tuntutan Kerja Luar</span>
+        <span style="font-size:11px;color:var(--amber-dark)">Kenyataan Tuntutan</span>
+      </div>
+      <div class="cs-body">
+        <div class="field"><label>Nama pegawai</label><input type="text" id="c-nama" placeholder="Nama penuh" /></div>
+        <div class="field"><label>Dari (alamat berlepas)</label>
+          <textarea id="c-dari" placeholder="cth: 12, Jalan Melawati 8, Taman Melawati, 81300 Johor Bahru"></textarea>
+        </div>
+        <div class="field"><label>Ke (destinasi)</label>
+          <textarea id="c-ke" placeholder="cth: Tempat bertugas rasmi di Angsana Mall"></textarea>
+        </div>
+        <div class="two">
+          <div class="field"><label>Jarak satu hala (km)</label><input type="number" id="c-jarak" step="0.01" min="0" placeholder="15.80" /></div>
+          <div class="field"><label></label></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Bertolak (Pergi)</label><input type="time" id="c-bp" /></div>
+          <div class="field"><label>Tiba (Pergi)</label><input type="time" id="c-tp" /></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Bertolak (Balik)</label><input type="time" id="c-bb" /></div>
+          <div class="field"><label>Tiba (Balik)</label><input type="time" id="c-tb" /></div>
+        </div>
+        <div style="height:0.5px;background:var(--border)"></div>
+        <div style="font-size:12px;font-weight:600;color:var(--text2)">Perbelanjaan tuntutan (RM)</div>
+        <div class="fare-row">
+          <label><svg class="ti ti-road" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-road"/></svg>Toll (Pergi)</label>
+          <input type="number" id="c-toll-p" step="0.10" min="0" placeholder="0.00" />
+        </div>
+        <div class="fare-row">
+          <label><svg class="ti ti-road" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-road"/></svg>Toll (Balik)</label>
+          <input type="number" id="c-toll-b" step="0.10" min="0" placeholder="0.00" />
+        </div>
+        <div class="fare-row">
+          <label><svg class="ti ti-parking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-parking"/></svg>Parking</label>
+          <input type="number" id="c-parking" step="0.10" min="0" placeholder="0.00" />
+        </div>
+        <div class="fare-row">
+          <label><svg class="ti ti-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-building"/></svg>Hotel</label>
+          <input type="number" id="c-hotel" step="0.10" min="0" placeholder="0.00" />
+        </div>
+        <div class="fare-row">
+          <label><svg class="ti ti-shopping-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-shopping-bag"/></svg>Belanja pelbagai</label>
+          <input type="number" id="c-pelbagai" step="0.10" min="0" placeholder="0.00" />
+        </div>
+        <button class="btn btn-amber" onclick="generateClaim()" style="margin-top:4px">
+          <svg class="ti ti-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-file-text"/></svg> Jana Kenyataan Tuntutan
+        </button>
+      </div>
+    </div>
+
+    <!-- CLAIM OUTPUT -->
+    <div class="claim-out" id="claim-out">
+      <div class="co-hdr">
+        <div class="co-hdr-title">KENYATAAN TUNTUTAN</div>
+        <div class="co-hdr-sub" id="co-sub"></div>
+      </div>
+
+      <div class="trip-row">
+        <div class="tr-hdr">
+          <span class="tr-badge pergi">Pergi</span>
+          <span class="tr-time" id="p-waktu"></span>
+        </div>
+        <div class="tc-r"><div class="tc-lbl">Tarikh</div><div class="tc-val" id="p-tarikh"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Bertolak</div><div class="tc-val" id="p-bertolak"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Tiba</div><div class="tc-val" id="p-tiba"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Dari</div><div class="tc-val" id="p-dari"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Ke</div><div class="tc-val" id="p-ke"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Tujuan</div><div class="tc-val" id="p-tujuan"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Jarak</div><div class="tc-val" id="p-jarak"></div></div>
+        <div class="tc-r" id="p-toll-r" style="display:none"><div class="tc-lbl">Toll</div><div class="tc-val" id="p-toll"></div></div>
+        <div class="tc-r" id="p-park-r" style="display:none"><div class="tc-lbl">Parking</div><div class="tc-val" id="p-parking"></div></div>
+        <div class="tc-r" id="p-hotel-r" style="display:none"><div class="tc-lbl">Hotel</div><div class="tc-val" id="p-hotel"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Layak tuntut</div><div class="tc-val" id="p-layak"></div></div>
+      </div>
+
+      <div class="trip-row" id="balik-row">
+        <div class="tr-hdr">
+          <span class="tr-badge balik">Balik</span>
+          <span class="tr-time" id="b-waktu"></span>
+        </div>
+        <div class="tc-r"><div class="tc-lbl">Tarikh</div><div class="tc-val" id="b-tarikh"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Bertolak</div><div class="tc-val" id="b-bertolak"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Tiba</div><div class="tc-val" id="b-tiba"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Dari</div><div class="tc-val" id="b-dari"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Ke</div><div class="tc-val" id="b-ke"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Tujuan</div><div class="tc-val" id="b-tujuan"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Jarak</div><div class="tc-val" id="b-jarak"></div></div>
+        <div class="tc-r" id="b-toll-r" style="display:none"><div class="tc-lbl">Toll</div><div class="tc-val" id="b-toll"></div></div>
+        <div class="tc-r"><div class="tc-lbl">Layak tuntut</div><div class="tc-val" id="b-layak"></div></div>
+      </div>
+
+      <div class="sum-title">Ringkasan tuntutan</div>
+      <div class="sum-row"><span class="sum-lbl">Jarak (pergi + balik)</span><span class="sum-val" id="sum-jarak"></span></div>
+      <div class="sum-row"><span class="sum-lbl">Toll (pergi)</span><span class="sum-val" id="sum-tp"></span></div>
+      <div class="sum-row"><span class="sum-lbl">Toll (balik)</span><span class="sum-val" id="sum-tb"></span></div>
+      <div class="sum-row"><span class="sum-lbl">Parking</span><span class="sum-val" id="sum-park"></span></div>
+      <div class="sum-row"><span class="sum-lbl">Hotel</span><span class="sum-val" id="sum-hotel"></span></div>
+      <div class="sum-row"><span class="sum-lbl">Belanja pelbagai</span><span class="sum-val" id="sum-pelb"></span></div>
+      <div class="sum-row total"><span class="sum-lbl">Jumlah tuntutan</span><span class="sum-val highlight" id="sum-total"></span></div>
+
+      <div style="display:flex;gap:7px;padding:10px 13px 13px">
+        <button class="btn btn-sm" onclick="copyClaim()" style="flex:1"><svg class="ti ti-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-copy"/></svg> Copy teks</button>
+        <button class="btn btn-sm btn-p" onclick="shareClaimWA()" style="flex:1"><svg class="ti ti-brand-whatsapp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-brand-whatsapp"/></svg> WhatsApp</button>
+      </div>
+    </div>
+
+  </div><!-- end scr-log -->
+
+  <!-- ══ RECORDS SCREEN ══ -->
+  <div class="screen" id="scr-list">
+    <div class="list-tb">
+      <div class="sb"><svg class="ti ti-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-search"/></svg><input type="text" id="search" placeholder="Cari tugas, nota, tag…" oninput="renderList()" /></div>
+      <div class="fr">
+        <select id="fc" onchange="renderList()">
+          <option value="">Semua kategori</option>
+          <option>Teknikal IT</option><option>Programming</option><option>Semakan Email</option>
+          <option>Johor Pay</option><option>Semakan Dokumen</option><option>Kerja Pejabat</option>
+          <option>Kerja Luar</option><option>Khidmat Kaunter ICT</option><option>Others</option>
+        </select>
+        <select id="fd" onchange="renderList()">
+          <option value="">Semua masa</option>
+          <option value="today">Hari ini</option>
+          <option value="week">Minggu ini</option>
+          <option value="month">Bulan ini</option>
+        </select>
+      </div>
+      <div class="ta">
+        <button class="btn-sm btn" onclick="refreshSheet()" aria-label="Refresh"><svg class="ti ti-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-refresh"/></svg></button>
+        <button class="btn-sm btn" onclick="exportCSV()"><svg class="ti ti-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-download"/></svg> CSV</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="entries" id="entries-list"></div>
+    <div id="el-empty" style="display:none" class="empty"><svg class="ti ti-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-inbox"/></svg><p>Tiada rekod dijumpai.</p></div>
+  </div>
+
+  <!-- ══ CHART SCREEN ══ -->
+  <div class="screen" id="scr-chart">
+    <div class="chart-w">
+      <div class="ct">Jam mengikut kategori</div>
+      <div class="leg" id="donut-leg"></div>
+      <div style="position:relative;width:100%;height:210px">
+        <canvas id="dc" role="img" aria-label="Carta donut jam per kategori">Carta jam mengikut kategori.</canvas>
+      </div>
+      <div style="height:20px"></div>
+      <div class="ct">Tugas setiap hari — 14 hari lepas</div>
+      <div style="position:relative;width:100%;height:160px;margin-top:8px">
+        <canvas id="bc" role="img" aria-label="Carta bar tugas setiap hari 14 hari lepas">Carta tugas setiap hari.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LAPORAN SCREEN ══ -->
+  <div class="screen" id="scr-sum">
+    <div class="sum-p">
+      <div class="two">
+        <div class="field"><label>Tarikh</label><input type="date" id="sum-date" /></div>
+        <button class="btn btn-p" onclick="genSum()" style="align-self:flex-end;height:48px">
+          <svg class="ti ti-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-file-text"/></svg> Jana
+        </button>
+      </div>
+      <div class="sum-out" id="sum-out">Pilih tarikh dan tekan Jana untuk menjana laporan harian.</div>
+      <div class="cr">
+        <button class="btn-sm btn" onclick="copySum()"><svg class="ti ti-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-copy"/></svg> Copy</button>
+        <button class="btn-sm btn btn-p" onclick="shareWA()"><svg class="ti ti-brand-whatsapp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-brand-whatsapp"/></svg> WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap"><div class="toast" id="toast" role="status" aria-live="polite"></div></div>
+</div><!-- end main-content -->
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="bnav active" id="nav-cal" onclick="sw('cal')"><svg class="ti ti-calendar-month" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-calendar-month"/></svg>Kalendar<div class="bnav-dot"></div></button>
+  <button class="bnav" id="nav-log" onclick="sw('log')"><svg class="ti ti-plus-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-plus-circle"/></svg>Log<div class="bnav-dot"></div></button>
+  <button class="bnav" id="nav-list" onclick="sw('list')"><svg class="ti ti-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-list"/></svg>Rekod<div class="bnav-dot"></div></button>
+  <button class="bnav" id="nav-chart" onclick="sw('chart')"><svg class="ti ti-chart-donut" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-chart-donut"/></svg>Chart<div class="bnav-dot"></div></button>
+  <button class="bnav" id="nav-sum" onclick="sw('sum')"><svg class="ti ti-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-file-text"/></svg>Laporan<div class="bnav-dot"></div></button>
+</div>
+
+<!-- SETUP OVERLAY -->
+<div class="setup-ov" id="setup-ov">
+  <div class="setup-sh">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span style="font-size:15px;font-weight:600;color:var(--text)">Google Sheets + Drive setup</span>
+      <button class="ib" onclick="closeSetup()" aria-label="Tutup"><svg class="ti ti-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-x"/></svg></button>
+    </div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:8px"><strong>Langkah 1:</strong> Buka Google Sheet → Extensions → Apps Script</p>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:6px"><strong>Langkah 2:</strong> Tampal kod ini:</p>
+    <div class="setup-code">function doGet(e){
+  return out(JSON.stringify(getSheet('Log').getDataRange().getValues()));
+}
+function doPost(e){
+  const d=JSON.parse(e.postData.contents);
+  if(d.action==='add'){
+    getSheet('Log').appendRow([d.id,d.datetime,d.title,d.category,
+      d.duration,d.tags,d.notes,d.attachUrl,d.attachName,d.claimJson||'']);
+  } else if(d.action==='delete'){
+    const sh=getSheet('Log'),r=sh.getDataRange().getValues();
+    for(let i=r.length-1;i>=1;i--)if(r[i][0]==d.id){sh.deleteRow(i+1);break;}
+  } else if(d.action==='update'){
+    const sh=getSheet('Log'),r=sh.getDataRange().getValues();
+    for(let i=r.length-1;i>=1;i--)if(r[i][0]==d.id){
+      sh.getRange(i+1,1,1,10).setValues([[d.id,d.datetime,d.title,
+        d.category,d.duration,d.tags,d.notes,d.attachUrl,d.attachName,d.claimJson||'']]);
+      break;
+    }
+  } else if(d.action==='addClaim'){
+    const sh=getSheet('Tuntutan');
+    sh.appendRow([d.logId,d.tarikh,d.nama,d.tujuan,d.dari,d.ke,
+      d.jarak,d.tollP,d.tollB,d.parking,d.hotel,d.pelbagai,d.jumlah,
+      d.bertolakP,d.tibaP,d.bertolakB,d.tibaB,new Date()]);
+  } else if(d.action==='upload'){
+    const fold=DriveApp.getFoldersByName('PKPJ Logbook').hasNext()
+      ?DriveApp.getFoldersByName('PKPJ Logbook').next()
+      :DriveApp.createFolder('PKPJ Logbook');
+    const file=fold.createFile(
+      Utilities.newBlob(Utilities.base64Decode(d.data),d.mimeType,d.filename));
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK,DriveApp.Permission.VIEW);
+    return out(JSON.stringify({url:file.getUrl()}));
+  }
+  return out('ok');
+}
+function getSheet(name){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  let sh=ss.getSheetByName(name);
+  if(!sh){
+    sh=ss.insertSheet(name);
+    if(name==='Log'){
+      const h=['ID','Datetime','Tajuk Tugas','Kategori','Tempoh (jam)',
+        'Tag','Nota','URL Lampiran','Nama Lampiran','Tuntutan Claim'];
+      sh.appendRow(h);
+      const hdr=sh.getRange(1,1,1,h.length);
+      hdr.setBackground('#0C447C').setFontColor('#FFFFFF')
+        .setFontWeight('bold').setFontSize(11);
+      sh.setFrozenRows(1);
+      sh.setColumnWidths(1,10,[80,140,220,130,80,120,200,200,140,300]);
+    }
+    if(name==='Tuntutan'){
+      const h=['Log ID','Tarikh','Nama Pegawai','Tujuan','Dari','Ke',
+        'Jarak (km)','Toll Pergi','Toll Balik','Parking','Hotel',
+        'Belanja Pelbagai','Jumlah Tuntutan','Bertolak (Pergi)',
+        'Tiba (Pergi)','Bertolak (Balik)','Tiba (Balik)','Dicatat Pada'];
+      sh.appendRow(h);
+      const hdr=sh.getRange(1,1,1,h.length);
+      hdr.setBackground('#854F0B').setFontColor('#FFFFFF')
+        .setFontWeight('bold').setFontSize(11);
+      sh.setFrozenRows(1);
+      sh.setColumnWidths(1,18,[80,90,140,200,200,200,80,80,80,80,80,100,110,100,100,100,100,130]);
+    }
+  }
+  return sh;
+}
+function out(s){
+  return ContentService.createTextOutput(s)
+    .setMimeType(ContentService.MimeType.JSON);
+}</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-top:10px"><strong>Langkah 3:</strong> Deploy → Execute as: Me → Access: Anyone. Copy URL, tampal di atas, tekan Connect.</p>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.5">Sheet akan auto-cipta tab <code style="font-family:var(--mono);background:var(--surface2);padding:1px 4px;border-radius:4px">Log</code> dan <code style="font-family:var(--mono);background:var(--surface2);padding:1px 4px;border-radius:4px">Tuntutan</code> dengan header BM, baris header berwarna, beku baris pertama, dan lebar kolum auto.</p>
+    <button class="btn btn-p" style="margin-top:14px;width:100%" onclick="closeSetup()"><svg class="ti ti-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-check"/></svg> Faham</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   STATE
+═══════════════════════════════════ */
+let entries = [], sheetUrl = '', connected = false;
+let editingId = null, pendingAttach = {url:'', name:''};
+let calY = new Date().getFullYear(), calM = new Date().getMonth(), selD = null;
+let dChart = null, bChart = null;
+let claimText = '';
+
+const MONTHS = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+const CMAP = {
+  'Teknikal IT':'cat-teknikal','Programming':'cat-prog','Semakan Email':'cat-email',
+  'Johor Pay':'cat-johor','Semakan Dokumen':'cat-dok','Kerja Pejabat':'cat-pej',
+  'Kerja Luar':'cat-luar','Khidmat Kaunter ICT':'cat-knt','Others':'cat-oth'
+};
+const CCOL = {
+  'Teknikal IT':'#378ADD','Programming':'#7F77DD','Semakan Email':'#1D9E75',
+  'Johor Pay':'#BA7517','Semakan Dokumen':'#D85A30','Kerja Pejabat':'#639922',
+  'Kerja Luar':'#D4537E','Khidmat Kaunter ICT':'#9B59D0','Others':'#888780'
+};
+
+/* ═══════════════════════════════════
+   HELPERS
+═══════════════════════════════════ */
+const nl = () => { const d = new Date(); return d.toISOString().slice(0,16); };
+const td = () => new Date().toISOString().slice(0,10);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+
+function toast(msg, icon='ti-check') {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<i class="ti ${icon}" style="font-size:15px"></i> ${msg}`;
+  t.classList.add('show'); clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function sv(id, v) { document.getElementById(id).textContent = v || '—'; }
+
+function fmt12(t) {
+  if (!t) return '—';
+  const [h, m] = t.split(':').map(Number);
+  return `${String(h%12||12).padStart(2,'0')}.${String(m).padStart(2,'0')}${h>=12?'pm':'am'}`;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y,mo,day] = d.split('-');
+  return `${day}.${mo}.${y}`;
+}
+
+function rmFmt(v) { return `RM${(parseFloat(v)||0).toFixed(2)}`; }
+
+/* ═══════════════════════════════════
+   NAV
+═══════════════════════════════════ */
+function sw(tab) {
+  ['cal','log','list','chart','sum'].forEach(t => {
+    document.getElementById('nav-'+t).classList.toggle('active', t===tab);
+    document.getElementById('scr-'+t).classList.toggle('active', t===tab);
+  });
+  if (tab==='list') renderList();
+  if (tab==='chart') renderCharts();
+  if (tab==='cal') renderCal();
+}
+
+/* ═══════════════════════════════════
+   STATS
+═══════════════════════════════════ */
+function updStats() {
+  const now = new Date(), tStr = now.toDateString();
+  const ws = new Date(now); ws.setDate(now.getDate()-now.getDay()); ws.setHours(0,0,0,0);
+  const tE = entries.filter(e => new Date(e.datetime).toDateString() === tStr);
+  const wE = entries.filter(e => new Date(e.datetime) >= ws);
+  const tot = entries.reduce((a,e) => a+(parseFloat(e.duration)||0), 0);
+  const todH = tE.reduce((a,e) => a+(parseFloat(e.duration)||0), 0);
+  document.getElementById('s-tot').textContent = entries.length;
+  document.getElementById('s-td').textContent = tE.length;
+  document.getElementById('s-hr').textContent = tot%1===0 ? tot+'h' : tot.toFixed(1)+'h';
+  document.getElementById('s-hs').textContent = todH>0 ? todH.toFixed(1)+'h hari ini' : '';
+  document.getElementById('s-wk').textContent = wE.length;
+}
+
+/* ═══════════════════════════════════
+   CALENDAR
+═══════════════════════════════════ */
+function renderCal() {
+  document.getElementById('cal-m').textContent = MONTHS[calM];
+  document.getElementById('cal-y').textContent = ' ' + calY;
+  const first = new Date(calY, calM, 1), startDow = first.getDay();
+  const dim = new Date(calY, calM+1, 0).getDate();
+  const prevDim = new Date(calY, calM, 0).getDate();
+  const today = new Date();
+  const ebd = {};
+  entries.forEach(e => {
+    if (!e.datetime) return;
+    const dk = e.datetime.slice(0,10);
+    if (!ebd[dk]) ebd[dk] = [];
+    ebd[dk].push(e);
+  });
+  let cells = [];
+  for (let i = startDow-1; i >= 0; i--) {
+    const d = prevDim - i;
+    const mo = calM===0?12:calM, yr2 = calM===0?calY-1:calY;
+    cells.push({d, cur:false, dk:`${yr2}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`});
+  }
+  for (let d = 1; d <= dim; d++) {
+    const dk = `${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cells.push({d, cur:true, dk});
+  }
+  const rem = cells.length % 7;
+  if (rem > 0) for (let d = 1; d <= 7-rem; d++) cells.push({d, cur:false, dk:'x'+d});
+
+  document.getElementById('cal-grid').innerHTML = cells.map(c => {
+    const ents = ebd[c.dk] || [];
+    const isT = c.cur && c.d===today.getDate() && calM===today.getMonth() && calY===today.getFullYear();
+    const isSel = c.dk === selD;
+    let cls = 'dc';
+    if (!c.cur) cls += ' om';
+    if (isT) cls += ' today';
+    if (isSel && !isT) cls += ' sel';
+    if (ents.length > 0 && !isT && !isSel) cls += ' has-work';
+    const hasLuar = ents.some(e => e.category === 'Kerja Luar');
+    const dots = ents.slice(0,4).map(e =>
+      `<div class="d" style="background:${isSel?'rgba(255,255,255,0.8)':CCOL[e.category]||'#888'}"></div>`
+    ).join('');
+    const extraDot = ents.length > 4 ? `<div class="d" style="background:${isSel?'rgba(255,255,255,0.5)':'#aaa'}"></div>` : '';
+    const luarMark = hasLuar && !isSel ? `<div style="position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:#D4537E"></div>` : '';
+    return `<div class="${cls}" onclick="selDay('${c.dk}',${c.cur})" role="button" style="position:relative" aria-label="${c.d}${ents.length?' — '+ents.length+' tugasan':''}">
+      <div class="dn">${c.d}</div>
+      <div class="dots">${dots}${extraDot}</div>
+      ${ents.length ? `<div class="day-ct">${ents.length}</div>` : ''}
+      ${luarMark}
+    </div>`;
+  }).join('');
+  if (selD) showDayPanel(selD);
+}
+
+function selDay(dk, isCur) {
+  if (!isCur) return;
+  selD = dk === selD ? null : dk;
+  if (!selD) document.getElementById('day-panel').style.display = 'none';
+  renderCal();
+}
+
+function showDayPanel(dk) {
+  const d = new Date(dk + 'T00:00');
+  const dLabel = d.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long'});
+  const dayE = entries.filter(e => e.datetime && e.datetime.slice(0,10)===dk)
+    .sort((a,b) => new Date(a.datetime)-new Date(b.datetime));
+  document.getElementById('dp-title').textContent = dLabel;
+  const totH = dayE.reduce((a,e) => a+(parseFloat(e.duration)||0), 0);
+  document.getElementById('dp-sub').textContent = dayE.length
+    ? `${dayE.length} tugasan · ${totH.toFixed(1)}j` : 'Tiada rekod';
+  const el = document.getElementById('day-entries');
+  if (!dayE.length) {
+    el.innerHTML = `<div class="de-empty"><svg class="ti ti-calendar-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-calendar-off"/></svg>Tiada tugasan hari ini.</div>`;
+  } else {
+    el.innerHTML = dayE.map(e => {
+      const cc = CMAP[e.category] || 'cat-oth';
+      const col = CCOL[e.category] || '#888';
+      const dur = parseFloat(e.duration);
+      const ds = isNaN(dur) ? '' : (dur%1===0 ? dur+'j' : dur.toFixed(1)+'j');
+      const t = new Date(e.datetime).toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit'});
+      const att = e.attachUrl ? `<a class="al" href="${e.attachUrl}" target="_blank" rel="noopener"><svg class="ti ti-paperclip" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-paperclip"/></svg>${e.attachName||'Lampiran'}</a>` : '';
+      const claimBtn = e.category==='Kerja Luar'
+        ? `<button class="de-claim-btn" onclick="openClaimForEntry('${e.id}')"><svg class="ti ti-receipt" style="font-size:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-receipt"/></svg> Jana Tuntutan</button>`
+        : '';
+      const claimChip = e.claimJson
+        ? `<span class="claim-chip"><svg class="ti ti-check" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-check"/></svg> Tuntutan disimpan</span>` : '';
+      return `<div class="de">
+        <div class="de-bar" style="background:${col}"></div>
+        <div class="de-body">
+          <div class="de-title">${e.title}</div>
+          <div class="de-meta">
+            <span class="badge ${cc}">${e.category}</span>
+            ${ds?`<span class="pill"><svg class="ti ti-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-clock"/></svg>${ds}</span>`:''}
+            <span class="pill"><svg class="ti ti-clock-hour-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-clock-hour-4"/></svg>${t}</span>
+          </div>
+          ${e.notes?`<div style="font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4">${e.notes.length>60?e.notes.slice(0,60)+'…':e.notes}</div>`:''}
+          ${att}${claimBtn}${claimChip}
+        </div>
+        <div class="de-acts">
+          <button class="ib" onclick="editEntry('${e.id}')" aria-label="Edit"><svg class="ti ti-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-edit"/></svg></button>
+          <button class="ib" onclick="delEntry('${e.id}')" aria-label="Padam"><svg class="ti ti-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-trash"/></svg></button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('day-panel').style.display = 'block';
+}
+
+function addForDay() {
+  if (!selD) return;
+  document.getElementById('f-dt').value = selD + 'T08:00';
+  sw('log');
+}
+
+function mv(dir) {
+  calM += dir;
+  if (calM > 11) { calM = 0; calY++; }
+  if (calM < 0) { calM = 11; calY--; }
+  selD = null; document.getElementById('day-panel').style.display = 'none';
+  renderCal();
+}
+
+function goToday() {
+  const t = new Date(); calY = t.getFullYear(); calM = t.getMonth(); selD = td();
+  renderCal();
+}
+
+/* ═══════════════════════════════════
+   CATEGORY CHANGE
+═══════════════════════════════════ */
+function onCatChange() {
+  const isLuar = document.getElementById('f-cat').value === 'Kerja Luar';
+  document.getElementById('claim-banner').style.display = isLuar ? 'flex' : 'none';
+  document.getElementById('claim-section').style.display = isLuar ? 'block' : 'none';
+  if (!isLuar) document.getElementById('claim-out').classList.remove('show');
+}
+
+/* ═══════════════════════════════════
+   OPEN CLAIM FROM CALENDAR ENTRY
+═══════════════════════════════════ */
+function openClaimForEntry(id) {
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  editingId = id;
+  document.getElementById('f-dt').value = e.datetime || nl();
+  document.getElementById('f-title').value = e.title || '';
+  document.getElementById('f-cat').value = 'Kerja Luar';
+  document.getElementById('f-dur').value = e.duration || '';
+  document.getElementById('f-tags').value = e.tags || '';
+  document.getElementById('f-notes').value = e.notes || '';
+  if (e.attachUrl) {
+    document.getElementById('f-link').value = e.attachUrl;
+    document.getElementById('lf').style.display = 'block';
+  }
+  // Pre-fill claim fields from entry
+  const dt = e.datetime ? e.datetime.slice(0,10) : td();
+  document.getElementById('c-nama').value = '';
+  document.getElementById('c-dari').value = '';
+  document.getElementById('c-ke').value = e.notes || '';
+  onCatChange();
+  sw('log');
+  setTimeout(() => document.getElementById('claim-section').scrollIntoView({behavior:'smooth', block:'start'}), 200);
+}
+
+/* ═══════════════════════════════════
+   LOG FORM SUBMIT
+═══════════════════════════════════ */
+function submitEntry() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { toast('Tajuk tugas diperlukan', 'ti-alert-circle'); return; }
+  const linkVal = document.getElementById('f-link').value.trim();
+  const claimData = buildClaimData();
+  const entry = {
+    id: editingId || uid(),
+    datetime: document.getElementById('f-dt').value,
+    title,
+    category: document.getElementById('f-cat').value,
+    duration: document.getElementById('f-dur').value,
+    tags: document.getElementById('f-tags').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+    attachUrl: linkVal || pendingAttach.url || '',
+    attachName: linkVal ? 'Lampiran link' : pendingAttach.name || '',
+    claimJson: claimData ? JSON.stringify(claimData) : ''
+  };
+  if (editingId) {
+    const i = entries.findIndex(e => e.id === editingId);
+    if (i >= 0) entries[i] = entry;
+    editingId = null;
+    resetFormUI();
+    pushSheet(entry, 'update');
+    toast('Entry dikemaskini', 'ti-check');
+  } else {
+    entries.unshift(entry);
+    pushSheet(entry, 'add');
+    toast('Entry disimpan', 'ti-check');
+  }
+  // If claim data exists, save to Tuntutan sheet
+  if (claimData) {
+    saveClaim(entry.id, claimData);
+  }
+  resetForm(); saveLocal(); updStats(); renderCal();
+}
+
+/* ═══════════════════════════════════
+   CLAIM LOGIC
+═══════════════════════════════════ */
+function buildClaimData() {
+  const dari = document.getElementById('c-dari').value.trim();
+  const ke = document.getElementById('c-ke').value.trim();
+  if (!dari || !ke) return null;
+  const jarak = parseFloat(document.getElementById('c-jarak').value) || 0;
+  return {
+    nama: document.getElementById('c-nama').value.trim(),
+    tujuan: document.getElementById('f-title').value.trim(),
+    dari, ke, jarak,
+    bertolakP: document.getElementById('c-bp').value,
+    tibaP: document.getElementById('c-tp').value,
+    bertolakB: document.getElementById('c-bb').value,
+    tibaB: document.getElementById('c-tb').value,
+    tollP: parseFloat(document.getElementById('c-toll-p').value)||0,
+    tollB: parseFloat(document.getElementById('c-toll-b').value)||0,
+    parking: parseFloat(document.getElementById('c-parking').value)||0,
+    hotel: parseFloat(document.getElementById('c-hotel').value)||0,
+    pelbagai: parseFloat(document.getElementById('c-pelbagai').value)||0,
+    tarikh: (document.getElementById('f-dt').value||td()).slice(0,10)
+  };
+}
+
+function generateClaim() {
+  const dari = document.getElementById('c-dari').value.trim();
+  const ke = document.getElementById('c-ke').value.trim();
+  const bpVal = document.getElementById('c-bp').value;
+  const tpVal = document.getElementById('c-tp').value;
+  if (!dari || !ke || !bpVal || !tpVal) {
+    toast('Sila lengkapkan lokasi dan waktu pergi', 'ti-alert-circle'); return;
+  }
+  const tujuan = document.getElementById('f-title').value.trim();
+  const dt = (document.getElementById('f-dt').value || td()).slice(0,10);
+  const jarak = parseFloat(document.getElementById('c-jarak').value) || 0;
+  const jarakTotal = jarak * 2;
+  const tollP = parseFloat(document.getElementById('c-toll-p').value)||0;
+  const tollB = parseFloat(document.getElementById('c-toll-b').value)||0;
+  const parking = parseFloat(document.getElementById('c-parking').value)||0;
+  const hotel = parseFloat(document.getElementById('c-hotel').value)||0;
+  const pelbagai = parseFloat(document.getElementById('c-pelbagai').value)||0;
+  const total = tollP + tollB + parking + hotel + pelbagai;
+  const nama = document.getElementById('c-nama').value.trim();
+  const bbVal = document.getElementById('c-bb').value;
+  const tbVal = document.getElementById('c-tb').value;
+  const hasBalik = bbVal && tbVal;
+
+  document.getElementById('co-sub').textContent = `${nama||'—'} · ${fmtDate(dt)} · Jumlah: ${rmFmt(total)}`;
+
+  // Pergi row
+  sv('p-tarikh', fmtDate(dt));
+  sv('p-bertolak', fmt12(bpVal));
+  sv('p-tiba', fmt12(tpVal));
+  sv('p-dari', dari);
+  sv('p-ke', ke);
+  sv('p-tujuan', tujuan ? `Bertugas rasmi — ${tujuan}` : 'Bertugas rasmi');
+  sv('p-jarak', jarak.toFixed(2)+' km');
+  document.getElementById('p-waktu').textContent = `${fmt12(bpVal)} → ${fmt12(tpVal)}`;
+  const pLayak = [];
+  if (tollP>0) pLayak.push(`Toll=RM${tollP.toFixed(2)}`);
+  if (parking>0) pLayak.push(`Parking=RM${parking.toFixed(2)}`);
+  if (hotel>0) pLayak.push(`Hotel=RM${hotel.toFixed(2)}`);
+  if (pelbagai>0) pLayak.push(`Belanja Pelbagai=RM${pelbagai.toFixed(2)}`);
+  sv('p-layak', pLayak.length ? pLayak.join('\n') : 'Belanja Pelbagai :');
+  document.getElementById('p-toll-r').style.display = tollP>0 ? 'flex' : 'none';
+  if (tollP>0) sv('p-toll', rmFmt(tollP));
+  document.getElementById('p-park-r').style.display = parking>0 ? 'flex' : 'none';
+  if (parking>0) sv('p-parking', rmFmt(parking));
+  document.getElementById('p-hotel-r').style.display = hotel>0 ? 'flex' : 'none';
+  if (hotel>0) sv('p-hotel', rmFmt(hotel));
+
+  // Balik row
+  const balikRow = document.getElementById('balik-row');
+  balikRow.style.display = hasBalik ? 'block' : 'none';
+  if (hasBalik) {
+    sv('b-tarikh', fmtDate(dt));
+    sv('b-bertolak', fmt12(bbVal));
+    sv('b-tiba', fmt12(tbVal));
+    sv('b-dari', ke);
+    sv('b-ke', dari);
+    sv('b-tujuan', tujuan ? `Selesai bertugas rasmi — ${tujuan}` : 'Selesai bertugas rasmi');
+    sv('b-jarak', jarak.toFixed(2)+' km');
+    document.getElementById('b-waktu').textContent = `${fmt12(bbVal)} → ${fmt12(tbVal)}`;
+    const bLayak = tollB>0 ? [`Toll=RM${tollB.toFixed(2)}`] : [];
+    sv('b-layak', bLayak.length ? bLayak.join('\n') : 'Belanja Pelbagai :');
+    document.getElementById('b-toll-r').style.display = tollB>0 ? 'flex' : 'none';
+    if (tollB>0) sv('b-toll', rmFmt(tollB));
+  }
+
+  // Summary
+  sv('sum-jarak', jarakTotal.toFixed(2)+' km');
+  const zc = v => { const el = arguments.callee; return v>0?'sum-val':'sum-val zero'; };
+  ['sum-tp','sum-tb','sum-park','sum-hotel','sum-pelb'].forEach((id,i) => {
+    const v = [tollP,tollB,parking,hotel,pelbagai][i];
+    document.getElementById(id).textContent = rmFmt(v);
+    document.getElementById(id).className = 'sum-val'+(v===0?' zero':'');
+  });
+  document.getElementById('sum-total').textContent = rmFmt(total);
+
+  // Build copy text
+  const lines = [
+    'KENYATAAN TUNTUTAN',
+    `Pegawai  : ${nama||'—'}`,
+    `Tarikh   : ${fmtDate(dt)}`,
+    '',
+    '--- PERGI ---',
+    `Tarikh   : ${fmtDate(dt)}`,
+    `Bertolak : ${fmt12(bpVal)}`,
+    `Tiba     : ${fmt12(tpVal)}`,
+    `Dari     : ${dari}`,
+    `Ke       : ${ke}`,
+    `Tujuan   : ${tujuan ? 'Bertugas rasmi — '+tujuan : 'Bertugas rasmi'}`,
+    `Jarak    : ${jarak.toFixed(2)} km`,
+    'Layak tuntut :',
+    tollP>0 ? `  Toll         : RM${tollP.toFixed(2)}` : null,
+    parking>0 ? `  Parking      : RM${parking.toFixed(2)}` : null,
+    hotel>0 ? `  Hotel        : RM${hotel.toFixed(2)}` : null,
+    pelbagai>0 ? `  Bel. Pelbagai: RM${pelbagai.toFixed(2)}` : null,
+  ];
+  if (hasBalik) {
+    lines.push('','--- BALIK ---',`Tarikh   : ${fmtDate(dt)}`,`Bertolak : ${fmt12(bbVal)}`,`Tiba     : ${fmt12(tbVal)}`,`Dari     : ${ke}`,`Ke       : ${dari}`,`Tujuan   : ${tujuan ? 'Selesai bertugas rasmi — '+tujuan : 'Selesai bertugas rasmi'}`,`Jarak    : ${jarak.toFixed(2)} km`,'Layak tuntut :',tollB>0?`  Toll (Balik) : RM${tollB.toFixed(2)}`:null);
+  }
+  lines.push('','=== RINGKASAN ===',`Jarak total   : ${jarakTotal.toFixed(2)} km`,`Toll (pergi)  : RM${tollP.toFixed(2)}`,`Toll (balik)  : RM${tollB.toFixed(2)}`,`Parking       : RM${parking.toFixed(2)}`,`Hotel         : RM${hotel.toFixed(2)}`,`Bel. pelbagai : RM${pelbagai.toFixed(2)}`,`JUMLAH        : RM${total.toFixed(2)}`);
+  claimText = lines.filter(l => l !== null && l !== undefined).join('\n');
+
+  document.getElementById('claim-out').classList.add('show');
+  document.getElementById('claim-out').scrollIntoView({behavior:'smooth', block:'start'});
+  toast('Tuntutan dijana — tekan Log Entry untuk simpan', 'ti-check');
+}
+
+async function saveClaim(logId, data) {
+  if (!sheetUrl || !connected) return;
+  const payload = {
+    action: 'addClaim', logId,
+    tarikh: data.tarikh, nama: data.nama, tujuan: data.tujuan,
+    dari: data.dari, ke: data.ke, jarak: data.jarak,
+    tollP: data.tollP, tollB: data.tollB, parking: data.parking,
+    hotel: data.hotel, pelbagai: data.pelbagai,
+    jumlah: data.tollP + data.tollB + data.parking + data.hotel + data.pelbagai,
+    bertolakP: data.bertolakP, tibaP: data.tibaP,
+    bertolakB: data.bertolakB, tibaB: data.tibaB
+  };
+  try {
+    await fetch(sheetUrl, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    toast('Tuntutan disimpan ke sheet Tuntutan', 'ti-check');
+  } catch(x) {}
+}
+
+function copyClaim() {
+  if (!claimText) { toast('Jana tuntutan dahulu', 'ti-alert-circle'); return; }
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(claimText).then(() => toast('Disalin!', 'ti-copy'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = claimText; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    toast('Disalin!', 'ti-copy');
+  }
+}
+
+function shareClaimWA() {
+  if (!claimText) { toast('Jana tuntutan dahulu', 'ti-alert-circle'); return; }
+  window.open('https://wa.me/?text=' + encodeURIComponent(claimText), '_blank');
+}
+
+function resetClaimFields() {
+  ['c-nama','c-dari','c-ke','c-jarak','c-bp','c-tp','c-bb','c-tb',
+   'c-toll-p','c-toll-b','c-parking','c-hotel','c-pelbagai'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('claim-out').classList.remove('show');
+  claimText = '';
+}
+
+/* ═══════════════════════════════════
+   LIST SCREEN
+═══════════════════════════════════ */
+function getFilt() {
+  const q = (document.getElementById('search').value||'').toLowerCase();
+  const cat = document.getElementById('fc').value;
+  const df = document.getElementById('fd').value;
+  const now = new Date(), tStr = now.toDateString();
+  const ws = new Date(now); ws.setDate(now.getDate()-now.getDay()); ws.setHours(0,0,0,0);
+  const ms = new Date(now.getFullYear(), now.getMonth(), 1);
+  return entries.filter(e => {
+    if (q && !((e.title||'').toLowerCase().includes(q)||(e.notes||'').toLowerCase().includes(q)||(e.tags||'').toLowerCase().includes(q))) return false;
+    if (cat && e.category!==cat) return false;
+    const d = new Date(e.datetime);
+    if (df==='today' && d.toDateString()!==tStr) return false;
+    if (df==='week' && d<ws) return false;
+    if (df==='month' && d<ms) return false;
+    return true;
+  });
+}
+
+function fdt(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return d.toLocaleDateString('ms-MY', {day:'numeric', month:'short'}) + ' ' +
+    d.toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit'});
+}
+
+function renderList() {
+  const list = getFilt().sort((a,b) => new Date(b.datetime)-new Date(a.datetime));
+  const el = document.getElementById('entries-list');
+  const emp = document.getElementById('el-empty');
+  if (!list.length) { el.innerHTML = ''; emp.style.display = ''; updStats(); return; }
+  emp.style.display = 'none';
+  el.innerHTML = list.map(e => {
+    const cc = CMAP[e.category] || 'cat-oth';
+    const dur = parseFloat(e.duration);
+    const ds = isNaN(dur) ? '' : (dur%1===0 ? dur+'j' : dur.toFixed(1)+'j');
+    const tags = e.tags ? e.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
+    const att = e.attachUrl ? `<a class="al" href="${e.attachUrl}" target="_blank" rel="noopener"><svg class="ti ti-paperclip" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-paperclip"/></svg>${e.attachName||'Lampiran'}</a>` : '';
+    let claim = '';
+    if (e.claimJson) {
+      try {
+        const cd = JSON.parse(e.claimJson);
+        const jml = cd.tollP + cd.tollB + cd.parking + cd.hotel + cd.pelbagai;
+        claim = `<span class="claim-chip"><svg class="ti ti-receipt" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-receipt"/></svg> Tuntutan: RM${jml.toFixed(2)}</span>`;
+      } catch(x) {}
+    }
+    return `<div class="ec">
+      <div class="et">
+        <div class="etitle">${e.title||'—'}</div>
+        <div style="display:flex;gap:2px;flex-shrink:0">
+          <button class="ib" onclick="editEntry('${e.id}')" aria-label="Edit"><svg class="ti ti-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-edit"/></svg></button>
+          <button class="ib" onclick="delEntry('${e.id}')" aria-label="Padam"><svg class="ti ti-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-trash"/></svg></button>
+        </div>
+      </div>
+      <div class="em">
+        <span class="badge ${cc}">${e.category}</span>
+        ${ds?`<span class="pill"><svg class="ti ti-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-clock"/></svg>${ds}</span>`:''}
+        <span class="pill"><svg class="ti ti-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-calendar"/></svg>${fdt(e.datetime)}</span>
+      </div>
+      ${tags?`<div class="trow">${tags}</div>`:''}
+      ${e.notes?`<div class="en">${e.notes.length>80?e.notes.slice(0,80)+'…':e.notes}</div>`:''}
+      ${att}${claim}
+    </div>`;
+  }).join('');
+  updStats();
+}
+
+/* ═══════════════════════════════════
+   CHARTS
+═══════════════════════════════════ */
+function renderCharts() {
+  const catH = {}; Object.keys(CCOL).forEach(c => catH[c]=0);
+  entries.forEach(e => { catH[e.category] = (catH[e.category]||0) + (parseFloat(e.duration)||0); });
+  const aC = Object.keys(CCOL).filter(c => catH[c]>0);
+  const dd = aC.map(c => +catH[c].toFixed(2));
+  const dc = aC.map(c => CCOL[c]);
+  document.getElementById('donut-leg').innerHTML = aC.map((c,i) =>
+    `<span class="li"><span class="ld" style="background:${dc[i]}"></span>${c} ${catH[c].toFixed(1)}j</span>`
+  ).join('');
+  if (dChart) dChart.destroy();
+  if (aC.length) {
+    dChart = new Chart(document.getElementById('dc'), {
+      type: 'doughnut',
+      data: {labels:aC, datasets:[{data:dd, backgroundColor:dc, borderWidth:2, borderColor:'#fff'}]},
+      options: {responsive:true, maintainAspectRatio:false, cutout:'68%',
+        plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed.toFixed(1)}j`}}}}
+    });
+  }
+  const days = [], dayCt = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i); d.setHours(0,0,0,0);
+    days.push(d.toLocaleDateString('ms-MY', {day:'numeric', month:'short'}));
+    dayCt.push(entries.filter(e => new Date(e.datetime).toDateString()===d.toDateString()).length);
+  }
+  if (bChart) bChart.destroy();
+  bChart = new Chart(document.getElementById('bc'), {
+    type: 'bar',
+    data: {labels:days, datasets:[{data:dayCt, backgroundColor:'#B5D4F4', borderColor:'#378ADD', borderWidth:1, borderRadius:4}]},
+    options: {responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{font:{size:9}, maxRotation:45, autoSkip:false}}, y:{ticks:{stepSize:1, font:{size:9}}, beginAtZero:true}}}
+  });
+}
+
+/* ═══════════════════════════════════
+   LAPORAN
+═══════════════════════════════════ */
+function genSum() {
+  const date = document.getElementById('sum-date').value;
+  if (!date) { toast('Pilih tarikh dahulu', 'ti-alert-circle'); return; }
+  const d = new Date(date + 'T00:00');
+  const dE = entries.filter(e => e.datetime && new Date(e.datetime).toDateString()===d.toDateString())
+    .sort((a,b) => new Date(a.datetime)-new Date(b.datetime));
+  if (!dE.length) { document.getElementById('sum-out').textContent = 'Tiada rekod kerja pada tarikh ini.'; return; }
+  const totH = dE.reduce((a,e) => a+(parseFloat(e.duration)||0), 0);
+  const dL = d.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  let lines = ['LAPORAN HARIAN KERJA', 'Tarikh: '+dL, 'Jumlah jam: '+totH.toFixed(1)+' jam', 'Jumlah tugas: '+dE.length+' tugasan', '', 'SENARAI TUGASAN:'];
+  dE.forEach((e,i) => {
+    const t = new Date(e.datetime).toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit'});
+    const dur = parseFloat(e.duration);
+    lines.push(`${i+1}. [${t}] ${e.title}${isNaN(dur)?'':' ('+dur.toFixed(1)+' jam)'}`);
+    lines.push(`   Kategori: ${e.category}`);
+    if (e.notes) lines.push(`   Nota: ${e.notes}`);
+    if (e.attachUrl) lines.push(`   Dokumen: ${e.attachUrl}`);
+    if (e.claimJson) {
+      try {
+        const cd = JSON.parse(e.claimJson);
+        const jml = cd.tollP + cd.tollB + cd.parking + cd.hotel + cd.pelbagai;
+        lines.push(`   Tuntutan: RM${jml.toFixed(2)} (${cd.dari} → ${cd.ke}, ${(cd.jarak*2).toFixed(2)}km)`);
+      } catch(x) {}
+    }
+  });
+  lines.push('', 'Disediakan oleh: ___________________', 'Tarikh: ___________________');
+  document.getElementById('sum-out').textContent = lines.join('\n');
+}
+
+function copySum() {
+  const txt = document.getElementById('sum-out').textContent;
+  if (navigator.clipboard) { navigator.clipboard.writeText(txt).then(() => toast('Disalin!', 'ti-copy')); }
+  else { const ta = document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('Disalin!', 'ti-copy'); }
+}
+
+function shareWA() {
+  window.open('https://wa.me/?text='+encodeURIComponent(document.getElementById('sum-out').textContent), '_blank');
+}
+
+/* ═══════════════════════════════════
+   ENTRY CRUD
+═══════════════════════════════════ */
+function resetFormUI() {
+  document.getElementById('sl').textContent = 'Log entry';
+  document.getElementById('form-title').innerHTML = '<svg class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-plus"/></svg>Entry baharu';
+  document.getElementById('cancel-btn').style.display = 'none';
+  document.getElementById('cancel-btn2').style.display = 'none';
+  document.getElementById('sub-btn').style.gridColumn = '1/-1';
+}
+
+function resetForm() {
+  document.getElementById('f-dt').value = nl();
+  ['f-title','f-dur','f-tags','f-notes','f-link'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('f-cat').value = 'Teknikal IT';
+  clrA(); document.getElementById('lf').style.display = 'none';
+  resetFormUI(); onCatChange(); resetClaimFields();
+}
+
+function editEntry(id) {
+  const e = entries.find(x => x.id===id); if (!e) return;
+  editingId = id; sw('log');
+  document.getElementById('f-dt').value = e.datetime || nl();
+  document.getElementById('f-title').value = e.title || '';
+  document.getElementById('f-cat').value = e.category || 'Teknikal IT';
+  document.getElementById('f-dur').value = e.duration || '';
+  document.getElementById('f-tags').value = e.tags || '';
+  document.getElementById('f-notes').value = e.notes || '';
+  if (e.attachUrl) { document.getElementById('f-link').value = e.attachUrl; document.getElementById('lf').style.display = 'block'; }
+  document.getElementById('sl').textContent = 'Simpan perubahan';
+  document.getElementById('form-title').innerHTML = '<svg class="ti ti-edit" style="font-size:14px;vertical-align:-2px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-edit"/></svg>Edit entry';
+  document.getElementById('cancel-btn').style.display = 'flex';
+  document.getElementById('cancel-btn2').style.display = 'flex';
+  document.getElementById('sub-btn').style.gridColumn = 'auto';
+  onCatChange();
+  if (e.claimJson) {
+    try {
+      const cd = JSON.parse(e.claimJson);
+      document.getElementById('c-nama').value = cd.nama||'';
+      document.getElementById('c-dari').value = cd.dari||'';
+      document.getElementById('c-ke').value = cd.ke||'';
+      document.getElementById('c-jarak').value = cd.jarak||'';
+      document.getElementById('c-bp').value = cd.bertolakP||'';
+      document.getElementById('c-tp').value = cd.tibaP||'';
+      document.getElementById('c-bb').value = cd.bertolakB||'';
+      document.getElementById('c-tb').value = cd.tibaB||'';
+      document.getElementById('c-toll-p').value = cd.tollP||'';
+      document.getElementById('c-toll-b').value = cd.tollB||'';
+      document.getElementById('c-parking').value = cd.parking||'';
+      document.getElementById('c-hotel').value = cd.hotel||'';
+      document.getElementById('c-pelbagai').value = cd.pelbagai||'';
+    } catch(x) {}
+  }
+}
+
+function cancelEdit() { editingId = null; resetForm(); }
+
+function delEntry(id) {
+  entries = entries.filter(e => e.id!==id);
+  pushSheet({id}, 'delete');
+  renderList(); if (selD) showDayPanel(selD);
+  renderCal(); saveLocal(); updStats();
+  toast('Entry dipadam', 'ti-trash');
+}
+
+/* ═══════════════════════════════════
+   ATTACHMENT
+═══════════════════════════════════ */
+function hf(file) {
+  if (!file) return;
+  document.getElementById('a-name').textContent = file.name;
+  const isImg = /\.(jpg|jpeg|png|gif|webp)/i.test(file.name);
+  document.getElementById('a-ico').setAttribute('href', isImg ? '#ti-photo' : file.name.endsWith('.pdf') ? '#ti-file-pdf' : '#ti-file');
+  document.getElementById('a-st').textContent = 'Preparing…';
+  document.getElementById('prog').style.width = '0%';
+  document.getElementById('ap').style.display = 'flex';
+  document.getElementById('up-zone').style.display = 'none';
+  if (!sheetUrl || !connected) {
+    document.getElementById('prog').style.width = '100%';
+    document.getElementById('a-st').textContent = 'Sambung Sheet untuk upload ke Drive';
+    pendingAttach = {url:'[local:'+file.name+']', name:file.name};
+    toast('Sambung ke Sheet untuk upload ke Drive', 'ti-alert-circle'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = async function(ev) {
+    try {
+      document.getElementById('prog').style.width = '30%';
+      document.getElementById('a-st').textContent = 'Uploading ke Drive…';
+      await fetch(sheetUrl, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({action:'upload', filename:file.name, mimeType:file.type, data:ev.target.result.split(',')[1]})});
+      document.getElementById('prog').style.width = '100%';
+      document.getElementById('a-st').textContent = 'Uploaded ke folder PKPJ Logbook';
+      pendingAttach = {url:'[drive:'+file.name+']', name:file.name};
+      toast('Uploaded ke Google Drive', 'ti-check');
+    } catch(err) {
+      document.getElementById('a-st').textContent = 'Upload gagal';
+      pendingAttach = {url:'[local:'+file.name+']', name:file.name};
     }
   };
+  reader.readAsDataURL(file);
+}
 
-  let currentLang = 'ms';
-  let currentIC   = '';
+function clrA() {
+  pendingAttach = {url:'', name:''};
+  document.getElementById('ap').style.display = 'none';
+  document.getElementById('up-zone').style.display = 'flex';
+  document.getElementById('fi').value = '';
+}
 
-  function setLang(lang, btn) {
-    currentLang = lang;
-    document.documentElement.setAttribute('data-lang', lang);
-    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    const t = i18n[lang];
-    document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (t[k] !== undefined) el.textContent = t[k]; });
-    document.querySelectorAll('[data-i18n-html]').forEach(el => { const k = el.getAttribute('data-i18n-html'); if (t[k] !== undefined) el.innerHTML = t[k]; });
-    document.getElementById('icInput').placeholder = t.placeholder;
+function toggleLF() { const l=document.getElementById('lf'); l.style.display=l.style.display==='none'?'block':'none'; }
+function dov(e) { e.preventDefault(); document.getElementById('up-zone').style.borderColor='var(--blue)'; }
+function dlv() { document.getElementById('up-zone').style.borderColor=''; }
+function dop(e) { e.preventDefault(); dlv(); const f=e.dataTransfer.files[0]; if(f) hf(f); }
+
+/* ═══════════════════════════════════
+   SHEET SYNC
+═══════════════════════════════════ */
+function saveLocal() {
+  try { localStorage.setItem('lb6_e', JSON.stringify(entries)); } catch(x) {}
+  try { localStorage.setItem('lb6_u', sheetUrl); } catch(x) {}
+}
+
+function loadLocal() {
+  try { const s=localStorage.getItem('lb6_e'); if(s) entries=JSON.parse(s); } catch(x) {}
+  try {
+    const u=localStorage.getItem('lb6_u');
+    if(u) {
+      sheetUrl=u;
+      document.getElementById('sheet-url').value=u;
+      /* Show neutral state — not connected yet, not failed */
+      document.getElementById('conn-dot').className = 'dot';
+      document.getElementById('conn-label').textContent = 'Connect';
+    }
+  } catch(x) {}
+  updStats(); renderCal();
+}
+
+function setConn(v) {
+  connected = v;
+  document.getElementById('conn-dot').className = 'dot' + (v?' on':' err');
+  document.getElementById('conn-label').textContent = v ? 'Connected' : 'Failed';
+}
+
+async function connectSheet() {
+  const val = document.getElementById('sheet-url').value.trim();
+  if (!val) { toast('Tampal URL Apps Script anda', 'ti-alert-circle'); return; }
+  sheetUrl = val; saveLocal(); toast('Menyambung…', 'ti-refresh');
+  try {
+    const res = await fetch(sheetUrl, {method:'GET', mode:'cors'});
+    if (!res.ok) throw new Error();
+    const rows = await res.json();
+    if (Array.isArray(rows) && rows.length > 1) {
+      entries = rows.slice(1).map(r => ({
+        id:r[0], datetime:r[1], title:r[2], category:r[3], duration:r[4],
+        tags:r[5], notes:r[6], attachUrl:r[7]||'', attachName:r[8]||'', claimJson:r[9]||''
+      })).filter(e => e.title);
+      saveLocal();
+    }
+    setConn(true); toggleConn(); toast('Disambung & disinkron', 'ti-check'); updStats(); renderCal();
+  } catch(x) { setConn(false); toast('Sambungan gagal', 'ti-alert-circle'); }
+}
+
+async function refreshSheet() {
+  if (!sheetUrl) { toast('Tiada sheet disambung', 'ti-alert-circle'); return; }
+  toast('Menyegar…', 'ti-refresh');
+  try {
+    const res = await fetch(sheetUrl, {method:'GET', mode:'cors'});
+    const rows = await res.json();
+    if (Array.isArray(rows) && rows.length > 1) {
+      entries = rows.slice(1).map(r => ({
+        id:r[0], datetime:r[1], title:r[2], category:r[3], duration:r[4],
+        tags:r[5], notes:r[6], attachUrl:r[7]||'', attachName:r[8]||'', claimJson:r[9]||''
+      })).filter(e => e.title);
+      saveLocal(); renderList(); renderCal(); updStats(); toast('Disegar', 'ti-check');
+    }
+  } catch(x) { toast('Penyegaran gagal', 'ti-alert-circle'); }
+}
+
+async function pushSheet(entry, action) {
+  if (!sheetUrl || !connected) return;
+  try {
+    await fetch(sheetUrl, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...entry, action})});
+  } catch(x) {}
+}
+
+function exportCSV() {
+  const cols = ['ID','Datetime','Tajuk Tugas','Kategori','Tempoh (jam)','Tag','Nota','URL Lampiran','Nama Lampiran','Tuntutan Claim'];
+  const rows = getFilt().map(e => [e.id,e.datetime,e.title,e.category,e.duration,e.tags,e.notes,e.attachUrl,e.attachName,e.claimJson]);
+  const csv = [cols,...rows].map(r => r.map(v => '"'+(v||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'logbook-pkpj-' + td() + '.csv';
+  a.click(); toast('CSV dieksport', 'ti-download');
+}
+
+function toggleConn() {
+  const a = document.getElementById('conn-area');
+  a.style.display = a.style.display==='none' ? 'block' : 'none';
+}
+
+function showSetup() { document.getElementById('setup-ov').classList.add('open'); }
+function closeSetup() { document.getElementById('setup-ov').classList.remove('open'); }
+document.getElementById('setup-ov').addEventListener('click', e => {
+  if (e.target===document.getElementById('setup-ov')) closeSetup();
+});
+
+/* ═══════════════════════════════════
+   THEME
+═══════════════════════════════════ */
+
+function setTheme(mode) {
+  const html = document.documentElement;
+  if (mode === 'auto') {
+    html.removeAttribute('data-theme');
+  } else {
+    html.setAttribute('data-theme', mode);
   }
+  localStorage.setItem('lb6_theme', mode);
+  updateThemeUI(mode);
+  closeThemeMenu();
+}
 
-  let isDark = true;
-  function toggleTheme() {
-    isDark = !isDark;
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+function updateThemeUI(mode) {
+  const iconEl = document.getElementById('theme-icon');
+  if (iconEl) {
+    /* theme-icon is an SVG <use> element — update its href, not className */
+    const iconMap = { light:'#ti-sun', dark:'#ti-moon', auto:'#ti-device-mobile' };
+    iconEl.setAttribute('href', iconMap[mode] || '#ti-sun');
   }
-
-  const input = document.getElementById('icInput');
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') lookup(); });
-  input.addEventListener('input', () => {
-    let v = input.value.replace(/[^0-9]/g, '');
-    if (v.length > 6) v = v.slice(0,6) + '-' + v.slice(6);
-    if (v.length > 9) v = v.slice(0,9) + '-' + v.slice(9);
-    if (v.length > 14) v = v.slice(0,14);
-    input.value = v;
+  ['light','dark','auto'].forEach(m => {
+    const el = document.getElementById('opt-'+m);
+    if (el) el.classList.toggle('active', m === mode);
   });
+}
 
-  function jsonp(url, cb) {
-    const name = 'cb_' + Date.now();
-    const s = document.createElement('script');
-    window[name] = d => { delete window[name]; document.body.removeChild(s); cb(null, d); };
-    s.onerror = () => { delete window[name]; document.body.removeChild(s); cb(new Error('Network error')); };
-    s.src = url + '&callback=' + name;
-    document.body.appendChild(s);
-    setTimeout(() => { if (window[name]) window[name]({ success: false, message: i18n[currentLang].errTimeout }); }, 10000);
+function toggleThemeMenu() {
+  const menu = document.getElementById('theme-menu');
+  if (menu) menu.classList.toggle('open');
+}
+
+function closeThemeMenu() {
+  const menu = document.getElementById('theme-menu');
+  if (menu) menu.classList.remove('open');
+}
+
+function loadTheme() {
+  const saved = localStorage.getItem('lb6_theme') || 'auto';
+  if (saved !== 'auto') document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+}
+
+document.addEventListener('click', e => {
+  const menu = document.getElementById('theme-menu');
+  const btn = document.getElementById('theme-btn');
+  if (menu && btn && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    closeThemeMenu();
   }
+});
 
-  function lookup() {
-    const ic = input.value.trim();
-    const t  = i18n[currentLang];
-    if (!ic) { showError(t.errEmpty); return; }
-    currentIC = ic;
-    setLoading(true);
-    document.getElementById('result').style.display = 'none';
-    jsonp(`${APPS_SCRIPT_URL}?action=lookup&ic=${encodeURIComponent(ic)}`, (err, data) => {
-      setLoading(false);
-      if (err || !data) { showError(t.errServer); return; }
-      if (data.success) showSuccess(data);
-      else showError(data.message || t.notFound);
-    });
-  }
-
-  function rekodKehadiran() {
-    const t = i18n[currentLang];
-    const yaBtn    = document.getElementById('btnYa');
-    const tidakBtn = document.getElementById('btnTidak');
-    if (yaBtn) yaBtn.disabled = true;
-    if (tidakBtn) tidakBtn.disabled = true;
-
-    jsonp(`${APPS_SCRIPT_URL}?action=rekod&ic=${encodeURIComponent(currentIC)}`, (err, data) => {
-      const box = document.getElementById('kehadiranResult');
-      if (err || !data) {
-        if (box) { box.className = 'kehadiran-result err'; box.textContent = t.recodErr; box.style.display = 'block'; }
-        return;
-      }
-      if (box) {
-        box.className = data.success ? 'kehadiran-result ok' : 'kehadiran-result err';
-        box.textContent = data.success ? t.recodOk : (data.message || t.recodErr);
-        box.style.display = 'block';
-      }
-      // Replace buttons with badge if success
-      if (data.success) {
-        const btnsDiv = document.getElementById('kehadiranBtns');
-        if (btnsDiv) btnsDiv.innerHTML = `<div class="sudah-hadir-badge">${escHtml(t.sudahHadir)}</div>`;
-      }
-    });
-  }
-
-  function batalKehadiran() {
-    const ks = document.getElementById('kehadiranSection');
-    if (ks) ks.style.display = 'none';
-  }
-
-  function setLoading(on) {
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = on; btn.classList.toggle('loading', on);
-  }
-
-  function showSuccess(d) {
-    const t = i18n[currentLang];
-    const kehadiranHTML = d.sudahHadir
-      ? `<div class="sudah-hadir-badge">${escHtml(t.sudahHadir)}</div>`
-      : `<div class="kehadiran-btns" id="kehadiranBtns">
-           <button class="btn-ya" id="btnYa" onclick="rekodKehadiran()">
-             ${escHtml(t.btnYa)}</button>
-           <button class="btn-tidak" id="btnTidak" onclick="batalKehadiran()">
-             ${escHtml(t.btnTidak)}</button>
-         </div>
-         <div class="kehadiran-result" id="kehadiranResult" style="display:none"></div>`;
-
-    const result = document.getElementById('result');
-    result.innerHTML = `
-      <div class="result-header">
-        <div class="status-icon ok">✓</div>
-        <div>
-          <div class="result-title">${escHtml(t.found)}</div>
-          <div class="result-sub">${escHtml(t.foundSub)}</div>
-        </div>
-      </div>
-      <div class="kaunter-box">
-        <div class="kaunter-label">${escHtml(t.kaunterLbl)}</div>
-        <div class="kaunter-num">${escHtml(d.kaunter)}</div>
-      </div>
-      <div class="info-grid">
-        <div class="info-row"><span class="info-key">${escHtml(t.keyIC)}</span><span class="info-value">${escHtml(d.ic)}</span></div>
-        ${d.nama  ? `<div class="info-row"><span class="info-key">${escHtml(t.keyNama)}</span><span class="info-value">${escHtml(d.nama)}</span></div>` : ''}
-        ${d.email ? `<div class="info-row"><span class="info-key">${escHtml(t.keyEmel)}</span><span class="info-value">${escHtml(d.email)}</span></div>` : ''}
-      </div>
-      <div class="kehadiran-section" id="kehadiranSection">
-        <div class="kehadiran-label">${escHtml(t.kehadiranLabel)}</div>
-        <div class="kehadiran-question">${escHtml(t.kehadiranQuestion)}</div>
-        ${kehadiranHTML}
-      </div>`;
-    result.style.display = 'block';
-  }
-
-  function showError(msg) {
-    const t = i18n[currentLang];
-    const result = document.getElementById('result');
-    result.innerHTML = `
-      <div class="result-header">
-        <div class="status-icon err">✕</div>
-        <div><div class="result-title">${escHtml(t.notFound)}</div><div class="result-sub">${escHtml(t.notFoundSub)}</div></div>
-      </div>
-      <div class="error-box">${escHtml(msg)}</div>`;
-    result.style.display = 'block';
-  }
-
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-    </script>
-
+/* ═══════════════════════════════════
+   INIT
+═══════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+  loadTheme();
+  document.getElementById('f-dt').value = nl();
+  document.getElementById('sum-date').value = td();
+  loadLocal();
+});
+</script>
 </body>
 </html>
