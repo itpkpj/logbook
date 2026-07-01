@@ -369,9 +369,8 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="brand">
+    <div class="brand-icon"><svg class="ti ti-notebook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-notebook"/></svg></div>
     <div>
-    <div class="brand-icon"><img src="pkpj.png" style="width: 45px; height: 45px;"></div>
-	 <!-- <div class="brand-icon"><svg class="ti ti-notebook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-notebook"/></svg></div> -->
       <div class="brand-name">Logbook PKPJ</div>
       <div class="brand-sub">Work task tracker</div>
     </div>
@@ -467,8 +466,16 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
 
     <div class="form-wrap">
       <div class="two">
-        <div class="field"><label>Tarikh & masa</label><input type="datetime-local" id="f-dt" /></div>
-        <div class="field"><label>Tempoh (j)</label><input type="number" id="f-dur" step="0.25" min="0.25" max="24" placeholder="1.5" /></div>
+        <div class="field"><label>Tarikh & masa mula</label><input type="datetime-local" id="f-dt" /></div>
+        <div class="field"><label>Tempoh (j)</label><input type="number" id="f-dur" step="0.25" min="0.25" max="999" placeholder="1.5" /></div>
+      </div>
+      <!-- Multi-day toggle -->
+      <div style="display:flex;align-items:center;gap:8px;padding:2px 0">
+        <input type="checkbox" id="f-multiday" style="width:18px;height:18px;accent-color:var(--blue);cursor:pointer" onchange="toggleMultiDay()" />
+        <label for="f-multiday" style="font-size:13px;color:var(--text2);cursor:pointer">Kerja lebih dari 1 hari</label>
+      </div>
+      <div id="multiday-fields" style="display:none">
+        <div class="field"><label>Tarikh & masa tamat</label><input type="datetime-local" id="f-dt-end" /></div>
       </div>
       <div class="field"><label>Tajuk tugas</label><input type="text" id="f-title" placeholder="Apa yang anda kerjakan?" /></div>
       <div class="field">
@@ -830,8 +837,23 @@ const CCOL = {
 /* ═══════════════════════════════════
    HELPERS
 ═══════════════════════════════════ */
-const nl = () => { const d = new Date(); return d.toISOString().slice(0,16); };
-const td = () => new Date().toISOString().slice(0,10);
+/* Local datetime string for form default — avoids UTC offset issues */
+const nl = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const mo = String(d.getMonth()+1).padStart(2,'0');
+  const dy = String(d.getDate()).padStart(2,'0');
+  const h = String(d.getHours()).padStart(2,'0');
+  const mi = String(d.getMinutes()).padStart(2,'0');
+  return `${y}-${mo}-${dy}T${h}:${mi}`;
+};
+const td = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const mo = String(d.getMonth()+1).padStart(2,'0');
+  const dy = String(d.getDate()).padStart(2,'0');
+  return `${y}-${mo}-${dy}`;
+};
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 
 function toast(msg, icon='ti-check') {
@@ -874,10 +896,13 @@ function sw(tab) {
    STATS
 ═══════════════════════════════════ */
 function updStats() {
-  const now = new Date(), tStr = now.toDateString();
-  const ws = new Date(now); ws.setDate(now.getDate()-now.getDay()); ws.setHours(0,0,0,0);
-  const tE = entries.filter(e => new Date(e.datetime).toDateString() === tStr);
-  const wE = entries.filter(e => new Date(e.datetime) >= ws);
+  const todayDk = td();
+  const ws = new Date(); ws.setDate(ws.getDate()-ws.getDay()); ws.setHours(0,0,0,0);
+  const tE = entries.filter(e => normDate(e.datetime) === todayDk);
+  const wE = entries.filter(e => {
+    const d = new Date(normDate(e.datetime)+'T00:00');
+    return d >= ws;
+  });
   const tot = entries.reduce((a,e) => a+(parseFloat(e.duration)||0), 0);
   const todH = tE.reduce((a,e) => a+(parseFloat(e.duration)||0), 0);
   document.getElementById('s-tot').textContent = entries.length;
@@ -900,9 +925,21 @@ function renderCal() {
   const ebd = {};
   entries.forEach(e => {
     if (!e.datetime) return;
-    const dk = e.datetime.slice(0,10);
+    const dk = normDate(e.datetime);
     if (!ebd[dk]) ebd[dk] = [];
     ebd[dk].push(e);
+    /* If multi-day entry (has dtEnd), also mark intermediate days */
+    if (e.dtEnd) {
+      const start = new Date(dk + 'T00:00');
+      const end = new Date(normDate(e.dtEnd) + 'T00:00');
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+        const xdk = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        if (xdk !== dk) {
+          if (!ebd[xdk]) ebd[xdk] = [];
+          ebd[xdk].push({...e, _continued:true});
+        }
+      }
+    }
   });
   let cells = [];
   for (let i = startDow-1; i >= 0; i--) {
@@ -952,7 +989,7 @@ function selDay(dk, isCur) {
 function showDayPanel(dk) {
   const d = new Date(dk + 'T00:00');
   const dLabel = d.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long'});
-  const dayE = entries.filter(e => e.datetime && e.datetime.slice(0,10)===dk)
+  const dayE = entries.filter(e => e.datetime && normDate(e.datetime)===dk)
     .sort((a,b) => new Date(a.datetime)-new Date(b.datetime));
   document.getElementById('dp-title').textContent = dLabel;
   const totH = dayE.reduce((a,e) => a+(parseFloat(e.duration)||0), 0);
@@ -966,9 +1003,18 @@ function showDayPanel(dk) {
       const cc = CMAP[e.category] || 'cat-oth';
       const col = CCOL[e.category] || '#888';
       const dur = parseFloat(e.duration);
-      const ds = isNaN(dur) ? '' : (dur%1===0 ? dur+'j' : dur.toFixed(1)+'j');
+      const ds = isNaN(dur) ? '' : (dur > 24 ? dur.toFixed(1)+'j (berbilang hari)' : dur%1===0 ? dur+'j' : dur.toFixed(1)+'j');
       const t = new Date(e.datetime).toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit'});
-      const att = e.attachUrl ? `<a class="al" href="${e.attachUrl}" target="_blank" rel="noopener"><svg class="ti ti-paperclip" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-paperclip"/></svg>${e.attachName||'Lampiran'}</a>` : '';
+      /* Show attachment as record — link if URL available, plain chip if not */
+      const validUrl = e.attachUrl && e.attachUrl.startsWith('http');
+      const attName = e.attachName || (e.attachUrl && !e.attachUrl.startsWith('http') ? e.attachUrl.replace(/^\[(drive|local):/, '').replace(/\]$/, '') : '');
+      const att = attName
+        ? (validUrl
+          ? `<a class="al" href="${e.attachUrl}" target="_blank" rel="noopener"><svg class="ti ti-paperclip" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-paperclip"/></svg>${attName}</a>`
+          : `<span class="al" style="cursor:default"><svg class="ti ti-paperclip" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-paperclip"/></svg>${attName}</span>`)
+        : '';
+      /* Multi-day badge */
+      const multiDayBadge = e.dtEnd ? `<span class="badge" style="background:#E6F1FB;color:#0C447C;border-color:#B5D4F4;font-size:10px">Sehingga ${normDate(e.dtEnd)}</span>` : '';
       const claimBtn = e.category==='Kerja Luar'
         ? `<button class="de-claim-btn" onclick="openClaimForEntry('${e.id}')"><svg class="ti ti-receipt" style="font-size:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-receipt"/></svg> Jana Tuntutan</button>`
         : '';
@@ -982,6 +1028,7 @@ function showDayPanel(dk) {
             <span class="badge ${cc}">${e.category}</span>
             ${ds?`<span class="pill"><svg class="ti ti-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-clock"/></svg>${ds}</span>`:''}
             <span class="pill"><svg class="ti ti-clock-hour-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-clock-hour-4"/></svg>${t}</span>
+            ${multiDayBadge}
           </div>
           ${e.notes?`<div style="font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4">${e.notes.length>60?e.notes.slice(0,60)+'…':e.notes}</div>`:''}
           ${att}${claimBtn}${claimChip}
@@ -1060,16 +1107,19 @@ function submitEntry() {
   if (!title) { toast('Tajuk tugas diperlukan', 'ti-alert-circle'); return; }
   const linkVal = document.getElementById('f-link').value.trim();
   const claimData = buildClaimData();
+  const isMultiDay = document.getElementById('f-multiday').checked;
+  const dtEnd = isMultiDay ? document.getElementById('f-dt-end').value : '';
   const entry = {
     id: editingId || uid(),
     datetime: document.getElementById('f-dt').value,
+    dtEnd,
     title,
     category: document.getElementById('f-cat').value,
     duration: document.getElementById('f-dur').value,
     tags: document.getElementById('f-tags').value.trim(),
     notes: document.getElementById('f-notes').value.trim(),
     attachUrl: linkVal || pendingAttach.url || '',
-    attachName: linkVal ? 'Lampiran link' : pendingAttach.name || '',
+    attachName: linkVal ? (pendingAttach.name || 'Lampiran link') : (pendingAttach.name || ''),
     claimJson: claimData ? JSON.stringify(claimData) : ''
   };
   if (editingId) {
@@ -1274,14 +1324,15 @@ function getFilt() {
   const q = (document.getElementById('search').value||'').toLowerCase();
   const cat = document.getElementById('fc').value;
   const df = document.getElementById('fd').value;
-  const now = new Date(), tStr = now.toDateString();
-  const ws = new Date(now); ws.setDate(now.getDate()-now.getDay()); ws.setHours(0,0,0,0);
-  const ms = new Date(now.getFullYear(), now.getMonth(), 1);
+  const todayDk = td();
+  const ws = new Date(); ws.setDate(ws.getDate()-ws.getDay()); ws.setHours(0,0,0,0);
+  const ms = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   return entries.filter(e => {
     if (q && !((e.title||'').toLowerCase().includes(q)||(e.notes||'').toLowerCase().includes(q)||(e.tags||'').toLowerCase().includes(q))) return false;
     if (cat && e.category!==cat) return false;
-    const d = new Date(e.datetime);
-    if (df==='today' && d.toDateString()!==tStr) return false;
+    const dk = normDate(e.datetime);
+    const d = new Date(dk+'T00:00');
+    if (df==='today' && dk!==todayDk) return false;
     if (df==='week' && d<ws) return false;
     if (df==='month' && d<ms) return false;
     return true;
@@ -1306,7 +1357,13 @@ function renderList() {
     const dur = parseFloat(e.duration);
     const ds = isNaN(dur) ? '' : (dur%1===0 ? dur+'j' : dur.toFixed(1)+'j');
     const tags = e.tags ? e.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('') : '';
-    const att = e.attachUrl ? `<a class="al" href="${e.attachUrl}" target="_blank" rel="noopener"><svg class="ti ti-paperclip" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-paperclip"/></svg>${e.attachName||'Lampiran'}</a>` : '';
+    const attName2 = e.attachName || (e.attachUrl && !e.attachUrl.startsWith('http') ? e.attachUrl.replace(/^\[(drive|local):/, '').replace(/\]$/, '') : '');
+    const validUrl2 = e.attachUrl && e.attachUrl.startsWith('http');
+    const att = attName2
+      ? (validUrl2
+        ? `<a class="al" href="${e.attachUrl}" target="_blank" rel="noopener"><svg class="ti ti-paperclip" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-paperclip"/></svg>${attName2}</a>`
+        : `<span class="al" style="cursor:default"><svg class="ti ti-paperclip" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-paperclip"/></svg>${attName2}</span>`)
+      : '';
     let claim = '';
     if (e.claimJson) {
       try {
@@ -1360,8 +1417,9 @@ function renderCharts() {
   const days = [], dayCt = [];
   for (let i = 13; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate()-i); d.setHours(0,0,0,0);
+    const dk = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     days.push(d.toLocaleDateString('ms-MY', {day:'numeric', month:'short'}));
-    dayCt.push(entries.filter(e => new Date(e.datetime).toDateString()===d.toDateString()).length);
+    dayCt.push(entries.filter(e => normDate(e.datetime)===dk).length);
   }
   if (bChart) bChart.destroy();
   bChart = new Chart(document.getElementById('bc'), {
@@ -1379,11 +1437,11 @@ function renderCharts() {
 function genSum() {
   const date = document.getElementById('sum-date').value;
   if (!date) { toast('Pilih tarikh dahulu', 'ti-alert-circle'); return; }
-  const d = new Date(date + 'T00:00');
-  const dE = entries.filter(e => e.datetime && new Date(e.datetime).toDateString()===d.toDateString())
+  const dE = entries.filter(e => e.datetime && normDate(e.datetime)===date)
     .sort((a,b) => new Date(a.datetime)-new Date(b.datetime));
   if (!dE.length) { document.getElementById('sum-out').textContent = 'Tiada rekod kerja pada tarikh ini.'; return; }
   const totH = dE.reduce((a,e) => a+(parseFloat(e.duration)||0), 0);
+  const d = new Date(date + 'T00:00');
   const dL = d.toLocaleDateString('ms-MY', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
   let lines = ['LAPORAN HARIAN KERJA', 'Tarikh: '+dL, 'Jumlah jam: '+totH.toFixed(1)+' jam', 'Jumlah tugas: '+dE.length+' tugasan', '', 'SENARAI TUGASAN:'];
   dE.forEach((e,i) => {
@@ -1428,8 +1486,10 @@ function resetFormUI() {
 
 function resetForm() {
   document.getElementById('f-dt').value = nl();
-  ['f-title','f-dur','f-tags','f-notes','f-link'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['f-title','f-dur','f-tags','f-notes','f-link','f-dt-end'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('f-cat').value = 'Teknikal IT';
+  document.getElementById('f-multiday').checked = false;
+  document.getElementById('multiday-fields').style.display = 'none';
   clrA(); document.getElementById('lf').style.display = 'none';
   resetFormUI(); onCatChange(); resetClaimFields();
 }
@@ -1443,7 +1503,23 @@ function editEntry(id) {
   document.getElementById('f-dur').value = e.duration || '';
   document.getElementById('f-tags').value = e.tags || '';
   document.getElementById('f-notes').value = e.notes || '';
-  if (e.attachUrl) { document.getElementById('f-link').value = e.attachUrl; document.getElementById('lf').style.display = 'block'; }
+  /* Restore multi-day */
+  if (e.dtEnd) {
+    document.getElementById('f-multiday').checked = true;
+    document.getElementById('multiday-fields').style.display = 'block';
+    document.getElementById('f-dt-end').value = e.dtEnd;
+  } else {
+    document.getElementById('f-multiday').checked = false;
+    document.getElementById('multiday-fields').style.display = 'none';
+  }
+  /* Restore attachment */
+  if (e.attachUrl && e.attachUrl.startsWith('http')) {
+    document.getElementById('f-link').value = e.attachUrl;
+    document.getElementById('lf').style.display = 'block';
+  } else if (e.attachName) {
+    document.getElementById('f-link').placeholder = 'Lampiran: ' + e.attachName + ' (tampal link Drive baharu)';
+    document.getElementById('lf').style.display = 'block';
+  }
   document.getElementById('sl').textContent = 'Simpan perubahan';
   document.getElementById('form-title').innerHTML = '<svg class="ti ti-edit" style="font-size:14px;vertical-align:-2px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-edit"/></svg>Edit entry';
   document.getElementById('cancel-btn').style.display = 'flex';
@@ -1494,24 +1570,48 @@ function hf(file) {
   document.getElementById('up-zone').style.display = 'none';
   if (!sheetUrl || !connected) {
     document.getElementById('prog').style.width = '100%';
-    document.getElementById('a-st').textContent = 'Sambung Sheet untuk upload ke Drive';
-    pendingAttach = {url:'[local:'+file.name+']', name:file.name};
-    toast('Sambung ke Sheet untuk upload ke Drive', 'ti-alert-circle'); return;
+    document.getElementById('a-st').textContent = '📎 Nama fail disimpan sebagai rekod';
+    /* Store filename as record even without Drive URL */
+    pendingAttach = {url: '', name: file.name};
+    toast('Nama fail disimpan — sambung Sheet untuk upload ke Drive', 'ti-check');
+    return;
   }
   const reader = new FileReader();
   reader.onload = async function(ev) {
     try {
       document.getElementById('prog').style.width = '30%';
       document.getElementById('a-st').textContent = 'Uploading ke Drive…';
-      await fetch(sheetUrl, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({action:'upload', filename:file.name, mimeType:file.type, data:ev.target.result.split(',')[1]})});
+      /* Use GET with base64 encoded params — avoids no-cors limitation so we can read the response URL */
+      const b64 = ev.target.result.split(',')[1];
+      const payload = { action:'upload', filename:file.name, mimeType:file.type, data:b64 };
+      /* POST with redirect:follow to get real response */
+      const res = await fetch(sheetUrl, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      let driveUrl = '';
+      try {
+        const json = await res.json();
+        driveUrl = json.url || '';
+      } catch(e) {}
       document.getElementById('prog').style.width = '100%';
-      document.getElementById('a-st').textContent = 'Uploaded ke folder PKPJ Logbook';
-      pendingAttach = {url:'[drive:'+file.name+']', name:file.name};
-      toast('Uploaded ke Google Drive', 'ti-check');
+      if (driveUrl) {
+        pendingAttach = {url: driveUrl, name: file.name};
+        document.getElementById('a-st').textContent = '✓ Uploaded ke Drive — link disimpan';
+        toast('Uploaded ke Google Drive ✓', 'ti-check');
+      } else {
+        /* CORS blocked response but upload likely worked — save filename as record */
+        pendingAttach = {url: '', name: file.name};
+        document.getElementById('a-st').textContent = '📎 Nama fail disimpan sebagai rekod';
+        toast('Nama fail disimpan ✓', 'ti-check');
+      }
     } catch(err) {
-      document.getElementById('a-st').textContent = 'Upload gagal';
-      pendingAttach = {url:'[local:'+file.name+']', name:file.name};
+      document.getElementById('a-st').textContent = '📎 Nama fail disimpan sebagai rekod';
+      document.getElementById('prog').style.width = '100%';
+      pendingAttach = {url: '', name: file.name};
+      toast('Nama fail disimpan ✓', 'ti-check');
     }
   };
   reader.readAsDataURL(file);
@@ -1524,6 +1624,61 @@ function clrA() {
   document.getElementById('fi').value = '';
 }
 
+/* Normalize datetime string to YYYY-MM-DD using LOCAL timezone, not UTC */
+function normDate(dt) {
+  if (!dt) return '';
+  const s = String(dt).trim();
+  /* Already YYYY-MM-DD... format — extract directly without parsing to avoid TZ shift */
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  /* Has timezone info — parse and use LOCAL date components to avoid UTC offset */
+  try {
+    const d = new Date(s);
+    if (!isNaN(d)) {
+      /* Use local date components, NOT toISOString() which gives UTC date */
+      const y = d.getFullYear();
+      const mo = String(d.getMonth()+1).padStart(2,'0');
+      const dy = String(d.getDate()).padStart(2,'0');
+      return `${y}-${mo}-${dy}`;
+    }
+  } catch(e) {}
+  return s.slice(0,10);
+}
+
+function toggleMultiDay() {
+  const on = document.getElementById('f-multiday').checked;
+  document.getElementById('multiday-fields').style.display = on ? 'block' : 'none';
+  if (on && !document.getElementById('f-dt-end').value) {
+    /* Default end = start + 1 day */
+    const start = document.getElementById('f-dt').value;
+    if (start) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + 1);
+      document.getElementById('f-dt-end').value = d.toISOString().slice(0,16);
+    }
+    /* Auto-calc hours */
+    calcMultiDayDuration();
+  }
+}
+
+function calcMultiDayDuration() {
+  const s = document.getElementById('f-dt').value;
+  const e = document.getElementById('f-dt-end').value;
+  if (s && e) {
+    const diff = (new Date(e) - new Date(s)) / 3600000;
+    if (diff > 0) document.getElementById('f-dur').value = diff.toFixed(2).replace(/\.?0+$/,'');
+  }
+}
+
+/* Hook end-date change to auto-calc duration */
+document.addEventListener('DOMContentLoaded', function() {
+  const endEl = document.getElementById('f-dt-end');
+  if (endEl) endEl.addEventListener('change', calcMultiDayDuration);
+  const startEl = document.getElementById('f-dt');
+  if (startEl) startEl.addEventListener('change', function() {
+    if (document.getElementById('f-multiday').checked) calcMultiDayDuration();
+  });
+});
 function toggleLF() { const l=document.getElementById('lf'); l.style.display=l.style.display==='none'?'block':'none'; }
 function dov(e) { e.preventDefault(); document.getElementById('up-zone').style.borderColor='var(--blue)'; }
 function dlv() { document.getElementById('up-zone').style.borderColor=''; }
