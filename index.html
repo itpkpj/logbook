@@ -1624,25 +1624,28 @@ function clrA() {
   document.getElementById('fi').value = '';
 }
 
-/* Normalize datetime string to YYYY-MM-DD using LOCAL timezone, not UTC */
+/* Normalize datetime to YYYY-MM-DD using Malaysia timezone (UTC+8) */
 function normDate(dt) {
   if (!dt) return '';
   const s = String(dt).trim();
-  /* Already YYYY-MM-DD... format — extract directly without parsing to avoid TZ shift */
-  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
-  /* Has timezone info — parse and use LOCAL date components to avoid UTC offset */
+
+  /* Plain YYYY-MM-DD or YYYY-MM-DDTHH:MM (no Z, no timezone) — treat as local */
+  if (/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/.test(s)) {
+    return s.slice(0, 10);
+  }
+
+  /* Has timezone info (Z or +offset) — convert to Malaysia time (UTC+8) */
   try {
     const d = new Date(s);
     if (!isNaN(d)) {
-      /* Use local date components, NOT toISOString() which gives UTC date */
-      const y = d.getFullYear();
-      const mo = String(d.getMonth()+1).padStart(2,'0');
-      const dy = String(d.getDate()).padStart(2,'0');
-      return `${y}-${mo}-${dy}`;
+      /* Add 8 hours offset to get Malaysia time */
+      const myt = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+      return myt.toISOString().slice(0, 10);
     }
   } catch(e) {}
-  return s.slice(0,10);
+
+  /* Fallback — slice directly */
+  return s.slice(0, 10);
 }
 
 function toggleMultiDay() {
