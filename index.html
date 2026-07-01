@@ -1168,9 +1168,12 @@ function submitEntry() {
   const claimData = buildClaimData();
   const isMultiDay = document.getElementById('f-multiday').checked;
   const dtEnd = isMultiDay ? document.getElementById('f-dt-end').value : '';
+  /* Ensure datetime is never empty — fallback to now */
+  const dtRaw = document.getElementById('f-dt').value;
+  const datetime = dtRaw && dtRaw.trim() !== '' ? dtRaw : nl();
   const entry = {
     id: editingId || uid(),
-    datetime: document.getElementById('f-dt').value,
+    datetime,
     dtEnd,
     title,
     category: document.getElementById('f-cat').value,
@@ -1344,7 +1347,7 @@ async function saveClaim(logId, data) {
     bertolakB: data.bertolakB, tibaB: data.tibaB
   };
   try {
-    await fetch(sheetUrl, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    await fetch(sheetUrl, {method:'POST', mode:'no-cors', headers:{'Content-Type': 'text/plain'}, body:JSON.stringify(payload)});
     toast('Tuntutan disimpan ke sheet Tuntutan', 'ti-check');
   } catch(x) {}
 }
@@ -1647,7 +1650,8 @@ function hf(file) {
       const res = await fetch(sheetUrl, {
         method: 'POST',
         redirect: 'follow',
-        headers: {'Content-Type':'application/json'},
+        /* text/plain avoids CORS preflight OPTIONS request */
+        headers: {'Content-Type': 'text/plain'},
         body: JSON.stringify(payload)
       });
       let driveUrl = '';
@@ -1755,12 +1759,22 @@ function saveLocal() {
 }
 
 function loadLocal() {
-  try { const s=localStorage.getItem('lb6_e'); if(s) entries=JSON.parse(s); } catch(x) {}
   try {
-    const u=localStorage.getItem('lb6_u');
-    if(u) {
-      sheetUrl=u;
-      document.getElementById('sheet-url').value=u;
+    const s = localStorage.getItem('lb6_e');
+    if (s) {
+      const parsed = JSON.parse(s);
+      /* Repair entries with empty/null datetime — use a placeholder so they still show */
+      entries = parsed.map(e => ({
+        ...e,
+        datetime: (e.datetime && String(e.datetime).trim()) ? e.datetime : nl()
+      }));
+    }
+  } catch(x) {}
+  try {
+    const u = localStorage.getItem('lb6_u');
+    if (u) {
+      sheetUrl = u;
+      document.getElementById('sheet-url').value = u;
       document.getElementById('conn-dot').className = 'dot';
       document.getElementById('conn-label').textContent = 'Connect';
     }
@@ -1908,7 +1922,13 @@ async function refreshSheet() {
 async function pushSheet(entry, action) {
   if (!sheetUrl || !connected) return;
   try {
-    await fetch(sheetUrl, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...entry, action})});
+    /* Use text/plain to avoid CORS preflight OPTIONS request */
+    await fetch(sheetUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify({...entry, action})
+    });
   } catch(x) {}
 }
 
