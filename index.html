@@ -308,7 +308,40 @@ body { display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; 
 .url-change-btn { width:30px; height:30px; border-radius:8px; border:0.5px solid var(--border-strong); background:var(--surface2); cursor:pointer; color:var(--text3); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
 .toast.show { opacity: 1; transform: translateY(0); }
 
-/* ── Ib icon button ── */
+/* ── Custom time picker ── */
+.tp-trigger { height:48px; border-radius:var(--radius); border:0.5px solid var(--border-strong); background:var(--surface2); color:var(--text); font-family:var(--font); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:0 12px; width:100%; user-select:none; }
+.tp-trigger:hover { border-color:var(--blue); }
+.tp-trigger .tp-val { font-weight:500; }
+.tp-trigger svg { opacity:0.5; }
+.tp-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:500; align-items:center; justify-content:center; }
+.tp-overlay.open { display:flex; }
+.tp-box { background:var(--surface); border-radius:16px; padding:0; width:280px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.25); }
+.tp-header { background:var(--blue-dark); padding:16px 20px 12px; display:flex; align-items:center; justify-content:space-between; }
+.tp-label { font-size:11px; color:rgba(255,255,255,0.65); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+.tp-display { display:flex; align-items:center; gap:2px; }
+.tp-hr, .tp-sep, .tp-mn { font-size:36px; font-weight:300; color:rgba(255,255,255,0.5); cursor:pointer; padding:2px 4px; border-radius:6px; }
+.tp-sep { cursor:default; }
+.tp-hr.active, .tp-mn.active { color:#fff; background:rgba(255,255,255,0.15); }
+.tp-ampm { display:flex; flex-direction:column; gap:4px; margin-left:8px; }
+.tp-ampm button { font-size:12px; font-weight:600; padding:4px 8px; border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:transparent; color:rgba(255,255,255,0.5); cursor:pointer; }
+.tp-ampm button.active { background:rgba(255,255,255,0.2); color:#fff; border-color:rgba(255,255,255,0.7); }
+.tp-clock { position:relative; width:220px; height:220px; margin:16px auto 0; }
+.tp-clock-face { width:100%; height:100%; border-radius:50%; background:var(--surface2); position:relative; cursor:pointer; }
+.tp-center { position:absolute; width:8px; height:8px; background:var(--blue-dark); border-radius:50%; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2; }
+.tp-hand { position:absolute; bottom:50%; left:50%; width:2px; transform-origin:bottom center; background:var(--blue-dark); border-radius:2px; transition:transform 0.1s; }
+.tp-hand-dot { position:absolute; top:-5px; left:50%; transform:translateX(-50%); width:28px; height:28px; background:var(--blue-dark); border-radius:50%; margin-left:-14px; }
+.tp-num { position:absolute; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:500; color:var(--text); border-radius:50%; cursor:pointer; transform:translate(-50%,-50%); }
+.tp-num.active { background:var(--blue-dark); color:#fff; }
+.tp-num.inner { font-size:11px; color:var(--text3); }
+.tp-actions { display:flex; justify-content:flex-end; gap:8px; padding:12px 16px; }
+.tp-actions button { font-size:13px; font-weight:600; padding:8px 16px; border:none; background:none; cursor:pointer; border-radius:8px; color:var(--blue-dark); }
+.tp-actions button:hover { background:var(--blue-bg); }
+.tp-actions .tp-ok { background:var(--blue-dark); color:#fff; }
+.tp-actions .tp-ok:hover { opacity:0.9; background:var(--blue-dark); }
+/* OT badge in form */
+.ot-section { background:var(--violet-bg); border:0.5px solid var(--violet-border); border-radius:var(--radius); padding:10px 12px; display:flex;flex-direction:column;gap:8px; }
+.ot-title { font-size:12px; font-weight:600; color:var(--violet-dark); display:flex; align-items:center; gap:5px; }
+.ot-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .ib { width: 34px; height: 34px; border: none; background: none; cursor: pointer; color: var(--text3); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
 .ib:active { background: var(--surface2); }
 
@@ -494,17 +527,77 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
     </div>
 
     <div class="form-wrap">
+      <!-- DATE + TIME fields — separated for better desktop UX -->
       <div class="two">
-        <div class="field"><label>Tarikh & masa mula</label><input type="datetime-local" id="f-dt" /></div>
-        <div class="field"><label>Tempoh (j)</label><input type="number" id="f-dur" step="0.25" min="0.25" max="999" placeholder="1.5" /></div>
+        <div class="field">
+          <label>Tarikh</label>
+          <input type="date" id="f-date" onchange="syncDatetime()" />
+        </div>
+        <div class="field">
+          <label>Masa mula</label>
+          <div class="tp-trigger" onclick="tpOpen('f-time-start', this)" tabindex="0">
+            <span class="tp-val" id="f-time-start-disp">08:00 AM</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg>
+          </div>
+          <input type="hidden" id="f-time-start" value="08:00" />
+        </div>
       </div>
+      <div class="two">
+        <div class="field">
+          <label>Masa tamat</label>
+          <div class="tp-trigger" onclick="tpOpen('f-time-end', this)" tabindex="0">
+            <span class="tp-val" id="f-time-end-disp">05:00 PM</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg>
+          </div>
+          <input type="hidden" id="f-time-end" value="17:00" />
+        </div>
+        <div class="field">
+          <label>Tempoh (j)</label>
+          <input type="number" id="f-dur" step="0.25" min="0.25" max="999" placeholder="9.0" readonly style="background:var(--surface2);cursor:default" />
+        </div>
+      </div>
+      <!-- Hidden combined datetime for internal use -->
+      <input type="hidden" id="f-dt" />
       <!-- Multi-day toggle -->
       <div style="display:flex;align-items:center;gap:8px;padding:2px 0">
         <input type="checkbox" id="f-multiday" style="width:18px;height:18px;accent-color:var(--blue);cursor:pointer" onchange="toggleMultiDay()" />
         <label for="f-multiday" style="font-size:13px;color:var(--text2);cursor:pointer">Kerja lebih dari 1 hari</label>
       </div>
       <div id="multiday-fields" style="display:none">
-        <div class="field"><label>Tarikh & masa tamat</label><input type="datetime-local" id="f-dt-end" /></div>
+        <div class="field"><label>Tarikh tamat</label><input type="date" id="f-dt-end" onchange="calcDuration()" /></div>
+      </div>
+      <!-- OT Section -->
+      <div style="display:flex;align-items:center;gap:8px;padding:2px 0">
+        <input type="checkbox" id="f-ot-toggle" style="width:18px;height:18px;accent-color:#9B59D0;cursor:pointer" onchange="toggleOT()" />
+        <label for="f-ot-toggle" style="font-size:13px;color:var(--text2);cursor:pointer">Ada Kerja Lebih Masa (OT)</label>
+      </div>
+      <div id="ot-section" style="display:none" class="ot-section">
+        <div class="ot-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg>
+          Kerja Lebih Masa (OT)
+        </div>
+        <div class="ot-row">
+          <div class="field">
+            <label>Masa OT mula</label>
+            <div class="tp-trigger" onclick="tpOpen('f-ot-start', this)" tabindex="0">
+              <span class="tp-val" id="f-ot-start-disp">05:00 PM</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg>
+            </div>
+            <input type="hidden" id="f-ot-start" value="17:00" />
+          </div>
+          <div class="field">
+            <label>Masa OT tamat</label>
+            <div class="tp-trigger" onclick="tpOpen('f-ot-end', this)" tabindex="0">
+              <span class="tp-val" id="f-ot-end-disp">--:-- --</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg>
+            </div>
+            <input type="hidden" id="f-ot-end" value="" />
+          </div>
+        </div>
+        <div class="field">
+          <label style="font-size:11px;color:var(--violet-dark)">Jumlah OT (jam)</label>
+          <input type="number" id="f-ot-dur" step="0.25" min="0.25" max="12" placeholder="0" readonly style="background:var(--surface2);cursor:default;height:40px;font-size:14px" />
+        </div>
       </div>
       <div class="field"><label>Tajuk tugas</label><input type="text" id="f-title" placeholder="Apa yang anda kerjakan?" /></div>
       <div class="field">
@@ -565,24 +658,48 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
         <span style="font-size:11px;color:var(--amber-dark)">Kenyataan Tuntutan</span>
       </div>
       <div class="cs-body">
-        <div class="field"><label>Nama pegawai</label><input type="text" id="c-nama" placeholder="Nama penuh" /></div>
-        <div class="field"><label>Dari (alamat berlepas)</label>
-          <textarea id="c-dari" placeholder="cth: 12, Jalan Melawati 8, Taman Melawati, 81300 Johor Bahru"></textarea>
+        <!-- ADDRESS DROPDOWN -->
+        <div class="field">
+          <label>Dari (alamat berlepas)</label>
+          <select id="c-dari-sel" onchange="onAlamatChange('dari')" style="margin-bottom:5px">
+            <option value="pkpj">No 12, Jalan Melawati 8, Taman Melawati, 81300 Johor Bahru, Johor Darul Ta'zim</option>
+            <option value="ki">Aras 1 & 2, Bangunan Dato' Abdul Rahman Andak, Kota Iskandar, 79503 Iskandar Puteri, Johor</option>
+            <option value="lain">Alamat lain…</option>
+          </select>
+          <textarea id="c-dari" style="display:none" placeholder="Taip alamat berlepas…"></textarea>
         </div>
-        <div class="field"><label>Ke (destinasi)</label>
-          <textarea id="c-ke" placeholder="cth: Tempat bertugas rasmi di Angsana Mall"></textarea>
+        <div class="field">
+          <label>Ke (destinasi)</label>
+          <select id="c-ke-sel" onchange="onAlamatChange('ke')" style="margin-bottom:5px">
+            <option value="lain">Alamat lain…</option>
+            <option value="pkpj">No 12, Jalan Melawati 8, Taman Melawati, 81300 Johor Bahru, Johor Darul Ta'zim</option>
+            <option value="ki">Aras 1 & 2, Bangunan Dato' Abdul Rahman Andak, Kota Iskandar, 79503 Iskandar Puteri, Johor</option>
+          </select>
+          <textarea id="c-ke" placeholder="Taip alamat destinasi…"></textarea>
         </div>
         <div class="two">
           <div class="field"><label>Jarak satu hala (km)</label><input type="number" id="c-jarak" step="0.01" min="0" placeholder="15.80" /></div>
           <div class="field"><label></label></div>
         </div>
         <div class="two">
-          <div class="field"><label>Bertolak (Pergi)</label><input type="time" id="c-bp" /></div>
-          <div class="field"><label>Tiba (Pergi)</label><input type="time" id="c-tp" /></div>
+          <div class="field"><label>Bertolak (Pergi)</label>
+            <div class="tp-trigger" onclick="tpOpen('c-bp',this)" tabindex="0"><span class="tp-val" id="c-bp-disp">08:00 AM</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
+            <input type="hidden" id="c-bp" value="08:00"/>
+          </div>
+          <div class="field"><label>Tiba (Pergi)</label>
+            <div class="tp-trigger" onclick="tpOpen('c-tp',this)" tabindex="0"><span class="tp-val" id="c-tp-disp">--:-- --</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
+            <input type="hidden" id="c-tp" value=""/>
+          </div>
         </div>
         <div class="two">
-          <div class="field"><label>Bertolak (Balik)</label><input type="time" id="c-bb" /></div>
-          <div class="field"><label>Tiba (Balik)</label><input type="time" id="c-tb" /></div>
+          <div class="field"><label>Bertolak (Balik)</label>
+            <div class="tp-trigger" onclick="tpOpen('c-bb',this)" tabindex="0"><span class="tp-val" id="c-bb-disp">--:-- --</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
+            <input type="hidden" id="c-bb" value=""/>
+          </div>
+          <div class="field"><label>Tiba (Balik)</label>
+            <div class="tp-trigger" onclick="tpOpen('c-tb',this)" tabindex="0"><span class="tp-val" id="c-tb-disp">05:00 PM</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
+            <input type="hidden" id="c-tb" value="17:00"/>
+          </div>
         </div>
         <div style="height:0.5px;background:var(--border)"></div>
         <div style="font-size:12px;font-weight:600;color:var(--text2)">Perbelanjaan tuntutan (RM)</div>
@@ -743,6 +860,37 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
   <button class="bnav" id="nav-sum" onclick="sw('sum')"><svg class="ti ti-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-file-text"/></svg>Laporan<div class="bnav-dot"></div></button>
 </div>
 
+<!-- CUSTOM TIME PICKER -->
+<div class="tp-overlay" id="tp-overlay" onclick="tpClickOverlay(event)">
+  <div class="tp-box">
+    <div class="tp-header">
+      <div>
+        <div class="tp-label">Pilih masa</div>
+        <div class="tp-display">
+          <div class="tp-hr active" id="tp-hr-disp" onclick="tpSetMode('hr')">12</div>
+          <div class="tp-sep">:</div>
+          <div class="tp-mn" id="tp-mn-disp" onclick="tpSetMode('mn')">00</div>
+          <div class="tp-ampm">
+            <button id="tp-am" onclick="tpSetAmpm('AM')">AM</button>
+            <button id="tp-pm" onclick="tpSetAmpm('PM')">PM</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tp-clock">
+      <div class="tp-clock-face" id="tp-face" onmousedown="tpStartDrag(event)" ontouchstart="tpStartDrag(event)">
+        <div class="tp-center"></div>
+        <div class="tp-hand" id="tp-hand"><div class="tp-hand-dot"></div></div>
+        <div id="tp-nums"></div>
+      </div>
+    </div>
+    <div class="tp-actions">
+      <button onclick="tpCancel()">BATAL</button>
+      <button class="tp-ok" onclick="tpOk()">OK</button>
+    </div>
+  </div>
+</div>
+
 <!-- CHANGE URL MODAL -->
 <div class="url-modal-ov" id="url-modal-ov" onclick="closeUrlModal()">
   <div class="url-modal" onclick="event.stopPropagation()">
@@ -794,7 +942,8 @@ function doPost(e) {
   const d = JSON.parse(e.postData.contents);
   if (d.action === 'add') {
     getSheet('Log').appendRow([d.id,d.datetime,d.title,d.category,
-      d.duration,d.tags,d.notes,d.attachUrl,d.attachName,d.claimJson||'']);
+      d.duration,d.tags,d.notes,d.attachUrl,d.attachName,
+      d.claimJson||'',d.otMula||'',d.otTamat||'',d.otDur||'']);
   } else if (d.action === 'delete') {
     const sh=getSheet('Log'), r=sh.getDataRange().getValues();
     for (let i=r.length-1;i>=1;i--)
@@ -803,13 +952,14 @@ function doPost(e) {
     const sh=getSheet('Log'), r=sh.getDataRange().getValues();
     for (let i=r.length-1;i>=1;i--)
       if (r[i][0]==d.id) {
-        sh.getRange(i+1,1,1,10).setValues([[d.id,d.datetime,d.title,
+        sh.getRange(i+1,1,1,13).setValues([[d.id,d.datetime,d.title,
           d.category,d.duration,d.tags,d.notes,
-          d.attachUrl,d.attachName,d.claimJson||'']]);
+          d.attachUrl,d.attachName,d.claimJson||'',
+          d.otMula||'',d.otTamat||'',d.otDur||'']]);
         break;
       }
   } else if (d.action === 'addClaim') {
-    getSheet('Tuntutan').appendRow([d.logId,d.tarikh,d.nama,d.tujuan,
+    getSheet('Tuntutan').appendRow([d.logId,d.tarikh,d.tujuan,
       d.dari,d.ke,d.jarak,d.tollP,d.tollB,d.parking,d.hotel,
       d.pelbagai,d.jumlah,d.bertolakP,d.tibaP,d.bertolakB,d.tibaB,new Date()]);
   } else if (d.action === 'upload') {
@@ -831,16 +981,17 @@ function getSheet(name) {
     sh = ss.insertSheet(name);
     if (name === 'Log') {
       const h = ['ID','Datetime','Tajuk Tugas','Kategori','Tempoh (jam)',
-        'Tag','Nota','URL Lampiran','Nama Lampiran','Tuntutan Claim'];
+        'Tag','Nota','URL Lampiran','Nama Lampiran','Tuntutan Claim',
+        'OT Mula','OT Tamat','OT (jam)'];
       sh.appendRow(h);
       sh.getRange(1,1,1,h.length)
         .setBackground('#0C447C').setFontColor('#FFFFFF')
         .setFontWeight('bold').setFontSize(11);
       sh.setFrozenRows(1);
-      sh.setColumnWidths(1,10,[80,140,220,130,80,120,200,200,140,300]);
+      sh.setColumnWidths(1,13,[80,140,220,130,80,120,200,200,140,300,80,80,70]);
     }
     if (name === 'Tuntutan') {
-      const h = ['Log ID','Tarikh','Nama Pegawai','Tujuan','Dari','Ke',
+      const h = ['Log ID','Tarikh','Tujuan','Dari','Ke',
         'Jarak (km)','Toll Pergi','Toll Balik','Parking','Hotel',
         'Belanja Pelbagai','Jumlah Tuntutan','Bertolak (Pergi)',
         'Tiba (Pergi)','Bertolak (Balik)','Tiba (Balik)','Dicatat Pada'];
@@ -849,7 +1000,7 @@ function getSheet(name) {
         .setBackground('#854F0B').setFontColor('#FFFFFF')
         .setFontWeight('bold').setFontSize(11);
       sh.setFrozenRows(1);
-      sh.setColumnWidths(1,18,[80,90,140,200,200,200,80,80,80,80,80,100,110,100,100,100,100,130]);
+      sh.setColumnWidths(1,17,[80,90,200,200,200,80,80,80,80,80,100,110,100,100,100,100,130]);
     }
   }
   return sh;
@@ -859,6 +1010,10 @@ function out(s) {
   return ContentService.createTextOutput(s)
     .setMimeType(ContentService.MimeType.JSON);
 }</div>
+    <div style="background:var(--amber-bg);border:0.5px solid var(--amber-border);border-radius:8px;padding:10px 13px;margin:10px 0;font-size:12px;color:var(--amber-dark);line-height:1.8">
+      ⚠️ <strong>Jika Sheet Log sudah wujud</strong> — tambah 3 kolum baharu secara manual:<br>
+      Kolum K = <strong>OT Mula</strong> &nbsp;|&nbsp; Kolum L = <strong>OT Tamat</strong> &nbsp;|&nbsp; Kolum M = <strong>OT (jam)</strong>
+    </div>
     <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-top:10px;font-weight:600">⚠️ Deployment settings yang WAJIB betul:</p>
     <div style="background:var(--amber-bg);border:0.5px solid var(--amber-border);border-radius:8px;padding:10px 13px;margin:8px 0;font-size:12px;color:var(--amber-dark);line-height:1.8">
       Execute as → <strong>Me (your Gmail)</strong><br>
@@ -902,9 +1057,7 @@ const nl = () => {
   const y = d.getFullYear();
   const mo = String(d.getMonth()+1).padStart(2,'0');
   const dy = String(d.getDate()).padStart(2,'0');
-  const h = String(d.getHours()).padStart(2,'0');
-  const mi = String(d.getMinutes()).padStart(2,'0');
-  return `${y}-${mo}-${dy}T${h}:${mi}`;
+  return `${y}-${mo}-${dy}T08:00`;
 };
 const td = () => {
   const d = new Date();
@@ -913,6 +1066,64 @@ const td = () => {
   const dy = String(d.getDate()).padStart(2,'0');
   return `${y}-${mo}-${dy}`;
 };
+
+/* Sync separate date + time fields into hidden #f-dt */
+function syncDatetime() {
+  const date = document.getElementById('f-date').value;
+  const time = document.getElementById('f-time-start').value || '08:00';
+  document.getElementById('f-dt').value = date && time ? `${date}T${time}` : '';
+}
+
+/* Auto-calc duration from start time to end time (or end date for multi-day) */
+function calcDuration() {
+  const date = document.getElementById('f-date').value;
+  const ts = document.getElementById('f-time-start').value || '08:00';
+  const te = document.getElementById('f-time-end').value || '17:00';
+  const isMulti = document.getElementById('f-multiday').checked;
+  const endDate = document.getElementById('f-dt-end').value;
+  if (!date) return;
+  let startDt = new Date(`${date}T${ts}`);
+  let endDt;
+  if (isMulti && endDate) {
+    endDt = new Date(`${endDate}T${te}`);
+  } else {
+    endDt = new Date(`${date}T${te}`);
+  }
+  const diffH = (endDt - startDt) / 3600000;
+  if (diffH > 0) {
+    document.getElementById('f-dur').value = diffH % 1 === 0 ? diffH : diffH.toFixed(2).replace(/\.?0+$/, '');
+  }
+  syncDatetime();
+}
+
+/* Address dropdown handler */
+const ALAMAT = {
+  pkpj: "No 12, Jalan Melawati 8, Taman Melawati, 81300 Johor Bahru, Johor Darul Ta'zim",
+  ki:   "Aras 1 & 2, Bangunan Dato' Abdul Rahman Andak, Kota Iskandar, 79503 Iskandar Puteri, Johor"
+};
+
+function onAlamatChange(field) {
+  const sel = document.getElementById(`c-${field}-sel`);
+  const ta  = document.getElementById(`c-${field}`);
+  const val = sel.value;
+  if (val === 'lain') {
+    ta.style.display = 'block';
+    ta.value = '';
+    ta.focus();
+  } else {
+    ta.style.display = 'none';
+    ta.value = ALAMAT[val] || '';
+  }
+}
+
+/* Set default addresses on form load */
+function initAlamat() {
+  /* Default: Dari = PKPJ, Ke = lain (user fills destination) */
+  document.getElementById('c-dari-sel').value = 'pkpj';
+  onAlamatChange('dari');
+  document.getElementById('c-ke-sel').value = 'lain';
+  onAlamatChange('ke');
+}
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 
 function toast(msg, icon='ti-check') {
@@ -1090,6 +1301,7 @@ function showDayPanel(dk) {
             ${multiDayBadge}
           </div>
           ${e.notes?`<div style="font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4">${e.notes.length>60?e.notes.slice(0,60)+'…':e.notes}</div>`:''}
+          ${e.otMula&&e.otTamat?`<span class="badge" style="background:var(--violet-bg);color:var(--violet-dark);border-color:var(--violet-border);font-size:10px;margin-top:4px">OT ${fmt12(e.otMula)}–${fmt12(e.otTamat)}${e.otDur?' ('+e.otDur+'j)':''}</span>`:''}
           ${att}${claimBtn}${claimChip}
         </div>
         <div class="de-acts">
@@ -1104,7 +1316,11 @@ function showDayPanel(dk) {
 
 function addForDay() {
   if (!selD) return;
+  document.getElementById('f-date').value = selD;
+  document.getElementById('f-time-start').value = '08:00';
+  document.getElementById('f-time-end').value = '17:00';
   document.getElementById('f-dt').value = selD + 'T08:00';
+  document.getElementById('f-dur').value = '9';
   sw('log');
 }
 
@@ -1138,7 +1354,12 @@ function openClaimForEntry(id) {
   const e = entries.find(x => x.id === id);
   if (!e) return;
   editingId = id;
-  document.getElementById('f-dt').value = e.datetime || nl();
+  const dtParts = (e.datetime || nl()).match(/^(\d{4}-\d{2}-\d{2})T?(\d{2}:\d{2})?/);
+  if (dtParts) {
+    document.getElementById('f-date').value = dtParts[1] || td();
+    document.getElementById('f-time-start').value = dtParts[2] || '08:00';
+    document.getElementById('f-dt').value = e.datetime || nl();
+  }
   document.getElementById('f-title').value = e.title || '';
   document.getElementById('f-cat').value = 'Kerja Luar';
   document.getElementById('f-dur').value = e.duration || '';
@@ -1148,11 +1369,8 @@ function openClaimForEntry(id) {
     document.getElementById('f-link').value = e.attachUrl;
     document.getElementById('lf').style.display = 'block';
   }
-  // Pre-fill claim fields from entry
-  const dt = e.datetime ? e.datetime.slice(0,10) : td();
-  document.getElementById('c-nama').value = '';
-  document.getElementById('c-dari').value = '';
-  document.getElementById('c-ke').value = e.notes || '';
+  /* Init address dropdown — from PKPJ by default */
+  initAlamat();
   onCatChange();
   sw('log');
   setTimeout(() => document.getElementById('claim-section').scrollIntoView({behavior:'smooth', block:'start'}), 200);
@@ -1168,21 +1386,24 @@ function submitEntry() {
   const claimData = buildClaimData();
   const isMultiDay = document.getElementById('f-multiday').checked;
   const dtEnd = isMultiDay ? document.getElementById('f-dt-end').value : '';
-  /* Ensure datetime is never empty — fallback to now */
   const dtRaw = document.getElementById('f-dt').value;
   const datetime = dtRaw && dtRaw.trim() !== '' ? dtRaw : nl();
+  /* OT fields */
+  const hasOT = document.getElementById('f-ot-toggle').checked;
+  const otMula = hasOT ? document.getElementById('f-ot-start').value : '';
+  const otTamat = hasOT ? document.getElementById('f-ot-end').value : '';
+  const otDur = hasOT ? (document.getElementById('f-ot-dur').value || '') : '';
   const entry = {
     id: editingId || uid(),
-    datetime,
-    dtEnd,
-    title,
+    datetime, dtEnd, title,
     category: document.getElementById('f-cat').value,
     duration: document.getElementById('f-dur').value,
     tags: document.getElementById('f-tags').value.trim(),
     notes: document.getElementById('f-notes').value.trim(),
     attachUrl: linkVal || pendingAttach.url || '',
     attachName: linkVal ? (pendingAttach.name || 'Lampiran link') : (pendingAttach.name || ''),
-    claimJson: claimData ? JSON.stringify(claimData) : ''
+    claimJson: claimData ? JSON.stringify(claimData) : '',
+    otMula, otTamat, otDur
   };
   if (editingId) {
     const i = entries.findIndex(e => e.id === editingId);
@@ -1196,23 +1417,26 @@ function submitEntry() {
     pushSheet(entry, 'add');
     toast('Entry disimpan', 'ti-check');
   }
-  // If claim data exists, save to Tuntutan sheet
-  if (claimData) {
-    saveClaim(entry.id, claimData);
-  }
+  if (claimData) saveClaim(entry.id, claimData);
   resetForm(); saveLocal(); updStats(); renderCal();
 }
 
 /* ═══════════════════════════════════
    CLAIM LOGIC
 ═══════════════════════════════════ */
+/* Get resolved address from dropdown or custom textarea */
+function getAlamat(field) {
+  const sel = document.getElementById(`c-${field}-sel`);
+  if (sel.value === 'lain') return document.getElementById(`c-${field}`).value.trim();
+  return ALAMAT[sel.value] || '';
+}
+
 function buildClaimData() {
-  const dari = document.getElementById('c-dari').value.trim();
-  const ke = document.getElementById('c-ke').value.trim();
+  const dari = getAlamat('dari');
+  const ke = getAlamat('ke');
   if (!dari || !ke) return null;
   const jarak = parseFloat(document.getElementById('c-jarak').value) || 0;
   return {
-    nama: document.getElementById('c-nama').value.trim(),
     tujuan: document.getElementById('f-title').value.trim(),
     dari, ke, jarak,
     bertolakP: document.getElementById('c-bp').value,
@@ -1229,8 +1453,8 @@ function buildClaimData() {
 }
 
 function generateClaim() {
-  const dari = document.getElementById('c-dari').value.trim();
-  const ke = document.getElementById('c-ke').value.trim();
+  const dari = getAlamat('dari');
+  const ke = getAlamat('ke');
   const bpVal = document.getElementById('c-bp').value;
   const tpVal = document.getElementById('c-tp').value;
   if (!dari || !ke || !bpVal || !tpVal) {
@@ -1246,12 +1470,11 @@ function generateClaim() {
   const hotel = parseFloat(document.getElementById('c-hotel').value)||0;
   const pelbagai = parseFloat(document.getElementById('c-pelbagai').value)||0;
   const total = tollP + tollB + parking + hotel + pelbagai;
-  const nama = document.getElementById('c-nama').value.trim();
   const bbVal = document.getElementById('c-bb').value;
   const tbVal = document.getElementById('c-tb').value;
   const hasBalik = bbVal && tbVal;
 
-  document.getElementById('co-sub').textContent = `${nama||'—'} · ${fmtDate(dt)} · Jumlah: ${rmFmt(total)}`;
+  document.getElementById('co-sub').textContent = `${fmtDate(dt)} · Jumlah: ${rmFmt(total)}`;
 
   // Pergi row
   sv('p-tarikh', fmtDate(dt));
@@ -1370,13 +1593,15 @@ function shareClaimWA() {
 }
 
 function resetClaimFields() {
-  ['c-nama','c-dari','c-ke','c-jarak','c-bp','c-tp','c-bb','c-tb',
+  ['c-jarak','c-bp','c-tp','c-bb','c-tb',
    'c-toll-p','c-toll-b','c-parking','c-hotel','c-pelbagai'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
+    const el = document.getElementById(id); if (el) el.value = '';
   });
+  document.getElementById('c-bp').value = '08:00';
+  document.getElementById('c-tb').value = '17:00';
   document.getElementById('claim-out').classList.remove('show');
   claimText = '';
+  initAlamat();
 }
 
 /* ═══════════════════════════════════
@@ -1449,6 +1674,7 @@ function renderList() {
       </div>
       ${tags?`<div class="trow">${tags}</div>`:''}
       ${e.notes?`<div class="en">${e.notes.length>80?e.notes.slice(0,80)+'…':e.notes}</div>`:''}
+      ${e.otMula&&e.otTamat?`<span class="badge" style="background:var(--violet-bg);color:var(--violet-dark);border-color:var(--violet-border);font-size:10px;margin-top:3px">OT ${fmt12(e.otMula)}–${fmt12(e.otTamat)}${e.otDur?' ('+e.otDur+'j)':''}</span>`:''}
       ${att}${claim}
     </div>`;
   }).join('');
@@ -1513,6 +1739,7 @@ function genSum() {
     lines.push(`   Kategori: ${e.category}`);
     if (e.notes) lines.push(`   Nota: ${e.notes}`);
     if (e.attachUrl) lines.push(`   Dokumen: ${e.attachUrl}`);
+    if (e.otMula && e.otTamat) lines.push(`   OT: ${fmt12(e.otMula)} – ${fmt12(e.otTamat)}${e.otDur?' ('+e.otDur+' jam)':''}`);
     if (e.claimJson) {
       try {
         const cd = JSON.parse(e.claimJson);
@@ -1547,19 +1774,53 @@ function resetFormUI() {
 }
 
 function resetForm() {
-  document.getElementById('f-dt').value = nl();
-  ['f-title','f-dur','f-tags','f-notes','f-link','f-dt-end'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  const today = td();
+  document.getElementById('f-date').value = today;
+  // Set time pickers to defaults
+  document.getElementById('f-time-start').value = '08:00';
+  document.getElementById('f-time-end').value = '17:00';
+  tpSetDisp('f-time-start', '08:00');
+  tpSetDisp('f-time-end', '17:00');
+  document.getElementById('f-dt').value = `${today}T08:00`;
+  document.getElementById('f-dur').value = '9';
+  ['f-title','f-tags','f-notes','f-link','f-dt-end'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('f-cat').value = 'Teknikal IT';
   document.getElementById('f-multiday').checked = false;
   document.getElementById('multiday-fields').style.display = 'none';
+  // Reset OT
+  document.getElementById('f-ot-toggle').checked = false;
+  document.getElementById('ot-section').style.display = 'none';
+  document.getElementById('f-ot-start').value = '17:00';
+  document.getElementById('f-ot-end').value = '';
+  document.getElementById('f-ot-dur').value = '';
+  tpSetDisp('f-ot-start', '17:00');
+  if (document.getElementById('f-ot-end-disp')) document.getElementById('f-ot-end-disp').textContent = '--:-- --';
   clrA(); document.getElementById('lf').style.display = 'none';
-  resetFormUI(); onCatChange(); resetClaimFields();
+  resetFormUI(); onCatChange(); resetClaimFields(); initAlamat();
 }
 
 function editEntry(id) {
   const e = entries.find(x => x.id===id); if (!e) return;
   editingId = id; sw('log');
-  document.getElementById('f-dt').value = e.datetime || nl();
+  const dt = e.datetime || nl();
+  const dtParts = dt.match(/^(\d{4}-\d{2}-\d{2})T?(\d{2}:\d{2})?/);
+  if (dtParts) {
+    document.getElementById('f-date').value = dtParts[1] || td();
+    const startTime = dtParts[2] || '08:00';
+    document.getElementById('f-time-start').value = startTime;
+    tpSetDisp('f-time-start', startTime);
+    document.getElementById('f-dt').value = dt;
+  }
+  // Try to restore end time from duration
+  if (e.duration) {
+    const [sh, sm] = (dtParts && dtParts[2] ? dtParts[2] : '08:00').split(':').map(Number);
+    const endMins = sh * 60 + (sm || 0) + parseFloat(e.duration) * 60;
+    const eh = Math.floor(endMins / 60) % 24;
+    const em = Math.round(endMins % 60);
+    const endTime = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+    document.getElementById('f-time-end').value = endTime;
+    tpSetDisp('f-time-end', endTime);
+  }
   document.getElementById('f-title').value = e.title || '';
   document.getElementById('f-cat').value = e.category || 'Teknikal IT';
   document.getElementById('f-dur').value = e.duration || '';
@@ -1569,10 +1830,23 @@ function editEntry(id) {
   if (e.dtEnd) {
     document.getElementById('f-multiday').checked = true;
     document.getElementById('multiday-fields').style.display = 'block';
-    document.getElementById('f-dt-end').value = e.dtEnd;
+    document.getElementById('f-dt-end').value = e.dtEnd.slice(0,10);
   } else {
     document.getElementById('f-multiday').checked = false;
     document.getElementById('multiday-fields').style.display = 'none';
+  }
+  /* Restore OT */
+  if (e.otMula && e.otTamat) {
+    document.getElementById('f-ot-toggle').checked = true;
+    document.getElementById('ot-section').style.display = 'block';
+    document.getElementById('f-ot-start').value = e.otMula;
+    document.getElementById('f-ot-end').value = e.otTamat;
+    document.getElementById('f-ot-dur').value = e.otDur || '';
+    tpSetDisp('f-ot-start', e.otMula);
+    tpSetDisp('f-ot-end', e.otTamat);
+  } else {
+    document.getElementById('f-ot-toggle').checked = false;
+    document.getElementById('ot-section').style.display = 'none';
   }
   /* Restore attachment */
   if (e.attachUrl && e.attachUrl.startsWith('http')) {
@@ -1591,14 +1865,28 @@ function editEntry(id) {
   if (e.claimJson) {
     try {
       const cd = JSON.parse(e.claimJson);
-      document.getElementById('c-nama').value = cd.nama||'';
-      document.getElementById('c-dari').value = cd.dari||'';
-      document.getElementById('c-ke').value = cd.ke||'';
+      /* Restore addresses to dropdown or custom textarea */
+      if (cd.dari) {
+        const darisKey = Object.keys(ALAMAT).find(k => ALAMAT[k] === cd.dari);
+        if (darisKey) { document.getElementById('c-dari-sel').value = darisKey; onAlamatChange('dari'); }
+        else { document.getElementById('c-dari-sel').value = 'lain'; onAlamatChange('dari'); document.getElementById('c-dari').value = cd.dari; }
+      }
+      if (cd.ke) {
+        const keKey = Object.keys(ALAMAT).find(k => ALAMAT[k] === cd.ke);
+        if (keKey) { document.getElementById('c-ke-sel').value = keKey; onAlamatChange('ke'); }
+        else { document.getElementById('c-ke-sel').value = 'lain'; onAlamatChange('ke'); document.getElementById('c-ke').value = cd.ke; }
+      }
       document.getElementById('c-jarak').value = cd.jarak||'';
-      document.getElementById('c-bp').value = cd.bertolakP||'';
+      const bpVal = cd.bertolakP||'08:00';
+      const tbVal = cd.tibaB||'17:00';
+      document.getElementById('c-bp').value = bpVal;
       document.getElementById('c-tp').value = cd.tibaP||'';
       document.getElementById('c-bb').value = cd.bertolakB||'';
-      document.getElementById('c-tb').value = cd.tibaB||'';
+      document.getElementById('c-tb').value = tbVal;
+      tpSetDisp('c-bp', bpVal);
+      tpSetDisp('c-tp', cd.tibaP||'');
+      tpSetDisp('c-bb', cd.bertolakB||'');
+      tpSetDisp('c-tb', tbVal);
       document.getElementById('c-toll-p').value = cd.tollP||'';
       document.getElementById('c-toll-b').value = cd.tollB||'';
       document.getElementById('c-parking').value = cd.parking||'';
@@ -1715,36 +2003,15 @@ function toggleMultiDay() {
   const on = document.getElementById('f-multiday').checked;
   document.getElementById('multiday-fields').style.display = on ? 'block' : 'none';
   if (on && !document.getElementById('f-dt-end').value) {
-    /* Default end = start + 1 day */
-    const start = document.getElementById('f-dt').value;
-    if (start) {
-      const d = new Date(start);
+    const startDate = document.getElementById('f-date').value;
+    if (startDate) {
+      const d = new Date(startDate + 'T12:00');
       d.setDate(d.getDate() + 1);
-      document.getElementById('f-dt-end').value = d.toISOString().slice(0,16);
+      document.getElementById('f-dt-end').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
-    /* Auto-calc hours */
-    calcMultiDayDuration();
+    calcDuration();
   }
 }
-
-function calcMultiDayDuration() {
-  const s = document.getElementById('f-dt').value;
-  const e = document.getElementById('f-dt-end').value;
-  if (s && e) {
-    const diff = (new Date(e) - new Date(s)) / 3600000;
-    if (diff > 0) document.getElementById('f-dur').value = diff.toFixed(2).replace(/\.?0+$/,'');
-  }
-}
-
-/* Hook end-date change to auto-calc duration */
-document.addEventListener('DOMContentLoaded', function() {
-  const endEl = document.getElementById('f-dt-end');
-  if (endEl) endEl.addEventListener('change', calcMultiDayDuration);
-  const startEl = document.getElementById('f-dt');
-  if (startEl) startEl.addEventListener('change', function() {
-    if (document.getElementById('f-multiday').checked) calcMultiDayDuration();
-  });
-});
 function toggleLF() { const l=document.getElementById('lf'); l.style.display=l.style.display==='none'?'block':'none'; }
 function dov(e) { e.preventDefault(); document.getElementById('up-zone').style.borderColor='var(--blue)'; }
 function dlv() { document.getElementById('up-zone').style.borderColor=''; }
@@ -1795,7 +2062,8 @@ async function autoConnect() {
     if (Array.isArray(rows) && rows.length > 1) {
       entries = rows.slice(1).map(r => ({
         id:r[0], datetime:r[1], title:r[2], category:r[3], duration:r[4],
-        tags:r[5], notes:r[6], attachUrl:r[7]||'', attachName:r[8]||'', claimJson:r[9]||''
+        tags:r[5], notes:r[6], attachUrl:r[7]||'', attachName:r[8]||'', claimJson:r[9]||'',
+        otMula:r[10]||'', otTamat:r[11]||'', otDur:r[12]||''
       })).filter(e => e.title);
       saveLocal();
     }
@@ -1831,7 +2099,8 @@ async function connectSheet() {
     if (Array.isArray(rows) && rows.length > 1) {
       entries = rows.slice(1).map(r => ({
         id:r[0], datetime:r[1], title:r[2], category:r[3], duration:r[4],
-        tags:r[5], notes:r[6], attachUrl:r[7]||'', attachName:r[8]||'', claimJson:r[9]||''
+        tags:r[5], notes:r[6], attachUrl:r[7]||'', attachName:r[8]||'', claimJson:r[9]||'',
+        otMula:r[10]||'', otTamat:r[11]||'', otDur:r[12]||''
       })).filter(e => e.title);
       saveLocal();
     }
@@ -1874,7 +2143,8 @@ async function saveNewUrl() {
     if (Array.isArray(rows) && rows.length > 1) {
       entries = rows.slice(1).map(r => ({
         id:r[0], datetime:r[1], title:r[2], category:r[3], duration:r[4],
-        tags:r[5], notes:r[6], attachUrl:r[7]||'', attachName:r[8]||'', claimJson:r[9]||''
+        tags:r[5], notes:r[6], attachUrl:r[7]||'', attachName:r[8]||'', claimJson:r[9]||'',
+        otMula:r[10]||'', otTamat:r[11]||'', otDur:r[12]||''
       })).filter(e => e.title);
       saveLocal();
     }
@@ -1912,7 +2182,8 @@ async function refreshSheet() {
     if (Array.isArray(rows) && rows.length > 1) {
       entries = rows.slice(1).map(r => ({
         id:r[0], datetime:r[1], title:r[2], category:r[3], duration:r[4],
-        tags:r[5], notes:r[6], attachUrl:r[7]||'', attachName:r[8]||'', claimJson:r[9]||''
+        tags:r[5], notes:r[6], attachUrl:r[7]||'', attachName:r[8]||'', claimJson:r[9]||'',
+        otMula:r[10]||'', otTamat:r[11]||'', otDur:r[12]||''
       })).filter(e => e.title);
       saveLocal(); renderList(); renderCal(); updStats(); toast('Disegar', 'ti-check');
     }
@@ -2007,14 +2278,207 @@ document.addEventListener('click', e => {
 });
 
 /* ═══════════════════════════════════
+   CUSTOM TIME PICKER
+═══════════════════════════════════ */
+let tpTarget = null;   // hidden input id
+let tpDispId = null;   // display span id
+let tpHr = 8;          // 1-12
+let tpMn = 0;
+let tpAmpm = 'AM';
+let tpMode = 'hr';     // 'hr' or 'mn'
+let tpDragging = false;
+
+function tpOpen(fieldId, triggerEl) {
+  tpTarget = fieldId;
+  tpDispId = fieldId + '-disp';
+  // Read current value
+  const val = document.getElementById(fieldId).value;
+  if (val) {
+    const [h24, m] = val.split(':').map(Number);
+    tpAmpm = h24 >= 12 ? 'PM' : 'AM';
+    tpHr = h24 % 12 || 12;
+    tpMn = m || 0;
+  } else {
+    tpHr = 8; tpMn = 0; tpAmpm = 'AM';
+  }
+  tpMode = 'hr';
+  tpRender();
+  document.getElementById('tp-overlay').classList.add('open');
+}
+
+function tpRender() {
+  // Update display
+  const hrStr = String(tpHr).padStart(2,'0');
+  const mnStr = String(tpMn).padStart(2,'0');
+  document.getElementById('tp-hr-disp').textContent = hrStr;
+  document.getElementById('tp-mn-disp').textContent = mnStr;
+  document.getElementById('tp-hr-disp').classList.toggle('active', tpMode==='hr');
+  document.getElementById('tp-mn-disp').classList.toggle('active', tpMode==='mn');
+  document.getElementById('tp-am').classList.toggle('active', tpAmpm==='AM');
+  document.getElementById('tp-pm').classList.toggle('active', tpAmpm==='PM');
+  // Draw clock numbers
+  const face = document.getElementById('tp-face');
+  const nums = document.getElementById('tp-nums');
+  const r = face.offsetWidth / 2 || 110;
+  nums.innerHTML = '';
+  if (tpMode === 'hr') {
+    for (let h = 1; h <= 12; h++) {
+      const angle = (h / 12) * 2 * Math.PI - Math.PI / 2;
+      const nr = r * 0.78;
+      const x = r + nr * Math.cos(angle);
+      const y = r + nr * Math.sin(angle);
+      const el = document.createElement('div');
+      el.className = 'tp-num' + (h === tpHr ? ' active' : '');
+      el.textContent = h;
+      el.style.left = x + 'px'; el.style.top = y + 'px';
+      el.addEventListener('click', () => { tpHr = h; tpMode = 'mn'; tpRender(); });
+      nums.appendChild(el);
+    }
+  } else {
+    for (let m = 0; m < 60; m += 5) {
+      const angle = (m / 60) * 2 * Math.PI - Math.PI / 2;
+      const nr = r * 0.78;
+      const x = r + nr * Math.cos(angle);
+      const y = r + nr * Math.sin(angle);
+      const el = document.createElement('div');
+      el.className = 'tp-num' + (m === tpMn ? ' active' : '');
+      el.textContent = String(m).padStart(2,'0');
+      el.style.left = x + 'px'; el.style.top = y + 'px';
+      el.addEventListener('click', () => { tpMn = m; tpRender(); });
+      nums.appendChild(el);
+    }
+  }
+  // Draw hand
+  const hand = document.getElementById('tp-hand');
+  const val = tpMode === 'hr' ? tpHr / 12 : tpMn / 60;
+  const angleDeg = val * 360 - 90;
+  const handLen = r * 0.72;
+  hand.style.height = handLen + 'px';
+  hand.style.transform = `rotate(${angleDeg + 90}deg)`;
+  hand.style.marginLeft = '-1px';
+}
+
+function tpSetMode(m) { tpMode = m; tpRender(); }
+function tpSetAmpm(a) { tpAmpm = a; tpRender(); }
+
+function tpGetAngleFromEvent(e) {
+  const face = document.getElementById('tp-face');
+  const rect = face.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return Math.atan2(clientY - cy, clientX - cx);
+}
+
+function tpStartDrag(e) {
+  tpDragging = true;
+  tpHandleDrag(e);
+  e.preventDefault();
+}
+
+function tpHandleDrag(e) {
+  if (!tpDragging) return;
+  const angle = tpGetAngleFromEvent(e);
+  const deg = (angle * 180 / Math.PI + 90 + 360) % 360;
+  if (tpMode === 'hr') {
+    let h = Math.round(deg / 30) || 12;
+    if (h === 0) h = 12;
+    tpHr = h;
+  } else {
+    tpMn = Math.round(deg / 6) % 60;
+  }
+  tpRender();
+}
+
+document.addEventListener('mousemove', tpHandleDrag);
+document.addEventListener('touchmove', e => tpHandleDrag(e), {passive:true});
+document.addEventListener('mouseup', () => tpDragging = false);
+document.addEventListener('touchend', () => tpDragging = false);
+
+function tpOk() {
+  const h24 = tpAmpm === 'PM' ? (tpHr === 12 ? 12 : tpHr + 12) : (tpHr === 12 ? 0 : tpHr);
+  const val24 = `${String(h24).padStart(2,'0')}:${String(tpMn).padStart(2,'0')}`;
+  const dispStr = `${String(tpHr).padStart(2,'0')}:${String(tpMn).padStart(2,'0')} ${tpAmpm}`;
+  document.getElementById(tpTarget).value = val24;
+  if (document.getElementById(tpDispId)) {
+    document.getElementById(tpDispId).textContent = dispStr;
+  }
+  document.getElementById('tp-overlay').classList.remove('open');
+  // Trigger recalc
+  if (tpTarget.startsWith('f-time')) calcDuration();
+  if (tpTarget.startsWith('f-ot')) calcOT();
+  if (tpTarget === 'c-bp' || tpTarget === 'c-tp' || tpTarget === 'c-bb' || tpTarget === 'c-tb') {
+    syncDatetime();
+  }
+}
+
+function tpCancel() { document.getElementById('tp-overlay').classList.remove('open'); }
+function tpClickOverlay(e) { if (e.target === document.getElementById('tp-overlay')) tpCancel(); }
+
+/* Set picker display for existing values on load/edit */
+function tpSetDisp(fieldId, val24) {
+  if (!val24) return;
+  const [h24, m] = val24.split(':').map(Number);
+  if (isNaN(h24)) return;
+  const ampm = h24 >= 12 ? 'PM' : 'AM';
+  const hr = h24 % 12 || 12;
+  const dispStr = `${String(hr).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`;
+  const el = document.getElementById(fieldId + '-disp');
+  if (el) el.textContent = dispStr;
+}
+
+/* ═══════════════════════════════════
+   OT FUNCTIONS
+═══════════════════════════════════ */
+function toggleOT() {
+  const on = document.getElementById('f-ot-toggle').checked;
+  document.getElementById('ot-section').style.display = on ? 'block' : 'none';
+  if (on) {
+    // Default OT start = work end time
+    const workEnd = document.getElementById('f-time-end').value || '17:00';
+    document.getElementById('f-ot-start').value = workEnd;
+    tpSetDisp('f-ot-start', workEnd);
+    document.getElementById('f-ot-end').value = '';
+    document.getElementById('f-ot-end-disp').textContent = '--:-- --';
+    document.getElementById('f-ot-dur').value = '';
+  }
+}
+
+function calcOT() {
+  const s = document.getElementById('f-ot-start').value;
+  const e = document.getElementById('f-ot-end').value;
+  if (!s || !e) return;
+  const [sh, sm] = s.split(':').map(Number);
+  const [eh, em] = e.split(':').map(Number);
+  let diff = (eh * 60 + em) - (sh * 60 + sm);
+  if (diff < 0) diff += 24 * 60; // past midnight OT
+  const hours = diff / 60;
+  document.getElementById('f-ot-dur').value = hours % 1 === 0 ? hours : hours.toFixed(2).replace(/\.?0+$/, '');
+}
+
+/* ═══════════════════════════════════
    INIT
 ═══════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', function() {
   loadTheme();
-  document.getElementById('f-dt').value = nl();
-  document.getElementById('sum-date').value = td();
+  const today = td();
+  document.getElementById('f-date').value = today;
+  document.getElementById('f-time-start').value = '08:00';
+  document.getElementById('f-time-end').value = '17:00';
+  document.getElementById('f-dt').value = `${today}T08:00`;
+  document.getElementById('f-dur').value = '9';
+  /* Init picker display labels */
+  tpSetDisp('f-time-start', '08:00');
+  tpSetDisp('f-time-end', '17:00');
+  tpSetDisp('c-bp', '08:00');
+  tpSetDisp('c-tb', '17:00');
+  tpSetDisp('f-ot-start', '17:00');
+  document.getElementById('sum-date').value = today;
+  initAlamat();
   loadLocal();
 });
 </script>
 </body>
 </html>
+
