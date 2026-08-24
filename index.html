@@ -342,6 +342,72 @@ body { display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; 
 .ot-section { background:var(--violet-bg); border:0.5px solid var(--violet-border); border-radius:var(--radius); padding:10px 12px; display:flex;flex-direction:column;gap:8px; }
 .ot-title { font-size:12px; font-weight:600; color:var(--violet-dark); display:flex; align-items:center; gap:5px; }
 .ot-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+/* ── TASK PANE ── */
+.task-toolbar { padding:10px 14px; display:flex; flex-direction:column; gap:8px; }
+.task-add-row { display:flex; gap:7px; }
+.task-add-row input { flex:1; height:46px; font-size:15px; padding:0 12px; border-radius:var(--radius); border:0.5px solid var(--border-strong); background:var(--surface2); color:var(--text); font-family:var(--font); }
+.task-add-row input:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-bg); }
+.task-add-btn { width:46px; height:46px; border-radius:var(--radius); background:var(--text); color:var(--surface); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.task-filters { display:flex; gap:5px; overflow-x:auto; padding-bottom:2px; }
+.tfilter { padding:6px 12px; font-size:12px; border-radius:20px; border:0.5px solid var(--border-strong); background:none; cursor:pointer; color:var(--text2); font-family:var(--font); white-space:nowrap; flex-shrink:0; }
+.tfilter.active { background:var(--text); color:var(--surface); border-color:var(--text); }
+.task-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; padding:0 14px 10px; }
+.tstat { background:var(--surface2); border-radius:8px; padding:8px 10px; text-align:center; }
+.tstat-v { font-size:18px; font-weight:600; color:var(--text); line-height:1; }
+.tstat-l { font-size:10px; color:var(--text3); margin-top:3px; text-transform:uppercase; letter-spacing:0.3px; }
+.progress-wrap { padding:0 14px 12px; }
+.progress-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--teal); border-radius:3px; transition:width 0.3s; }
+.progress-txt { font-size:11px; color:var(--text3); margin-top:5px; display:flex; justify-content:space-between; }
+.task-list { display:flex; flex-direction:column; }
+.task-item { display:flex; gap:10px; padding:12px 14px; border-bottom:0.5px solid var(--border); align-items:flex-start; }
+.task-item:last-child { border-bottom:none; }
+.task-item.done { opacity:0.5; }
+.task-item.done .task-title { text-decoration:line-through; color:var(--text3); }
+.task-check { width:22px; height:22px; border-radius:6px; border:1.5px solid var(--border-strong); cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; margin-top:1px; background:none; }
+.task-check.checked { background:var(--teal); border-color:var(--teal); }
+.task-check svg { width:14px; height:14px; color:#fff; opacity:0; }
+.task-check.checked svg { opacity:1; }
+.task-body { flex:1; min-width:0; }
+.task-title { font-size:14px; font-weight:500; color:var(--text); line-height:1.35; word-break:break-word; }
+.task-meta { display:flex; gap:5px; align-items:center; flex-wrap:wrap; margin-top:5px; }
+.task-note { font-size:12px; color:var(--text2); margin-top:4px; line-height:1.4; }
+.prio { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:600; border:0.5px solid transparent; }
+.prio-high { background:var(--coral-bg); color:var(--coral-dark); border-color:var(--coral-border); }
+.prio-med { background:var(--amber-bg); color:var(--amber-dark); border-color:var(--amber-border); }
+.prio-low { background:var(--teal-bg); color:var(--teal-dark); border-color:var(--teal-border); }
+.due-pill { display:inline-flex; align-items:center; gap:3px; font-size:11px; padding:2px 7px; border-radius:20px; border:0.5px solid var(--border); color:var(--text3); background:var(--surface2); }
+.due-pill.overdue { background:var(--coral-bg); color:var(--coral-dark); border-color:var(--coral-border); font-weight:600; }
+.due-pill.today { background:var(--blue-bg); color:var(--blue-dark); border-color:var(--blue-border); font-weight:600; }
+.task-acts { display:flex; gap:1px; flex-shrink:0; }
+.task-detail { display:none; padding:10px 14px; background:var(--surface2); border-top:0.5px solid var(--border); flex-direction:column; gap:9px; }
+.task-detail.open { display:flex; }
+.subtask-row { display:flex; align-items:center; gap:8px; padding:5px 0; }
+.subtask-check { width:18px; height:18px; border-radius:5px; border:1.5px solid var(--border-strong); cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:none; }
+.subtask-check.checked { background:var(--teal); border-color:var(--teal); }
+.subtask-check svg { width:11px; height:11px; color:#fff; opacity:0; }
+.subtask-check.checked svg { opacity:1; }
+.subtask-txt { font-size:13px; color:var(--text); flex:1; }
+.subtask-txt.done { text-decoration:line-through; color:var(--text3); }
+.subtask-add { display:flex; gap:6px; margin-top:4px; }
+.subtask-add input { flex:1; height:36px; font-size:13px; padding:0 10px; border-radius:8px; border:0.5px solid var(--border-strong); background:var(--surface); color:var(--text); font-family:var(--font); }
+.task-empty { padding:2.5rem 1rem; text-align:center; color:var(--text3); }
+.task-empty svg { width:36px; height:36px; margin-bottom:8px; opacity:0.4; }
+.task-empty p { font-size:13px; }
+.tm-ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:400; align-items:flex-end; justify-content:center; }
+.tm-ov.open { display:flex; }
+.tm-box { background:var(--surface); border-radius:16px 16px 0 0; padding:1.2rem; width:100%; max-width:430px; max-height:85vh; overflow-y:auto; }
+
+/* ── GPS ── */
+.gps-btn { height:40px; padding:0 12px; border-radius:8px; border:0.5px solid var(--blue-border); background:var(--blue-bg); color:var(--blue-dark); font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; font-family:var(--font); width:100%; }
+.gps-btn:active { opacity:0.75; }
+.gps-btn:disabled { opacity:0.5; cursor:default; }
+.gps-row { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:6px; }
+.gps-status { font-size:11px; color:var(--text3); margin-top:5px; line-height:1.5; padding:6px 9px; background:var(--surface2); border-radius:6px; border:0.5px solid var(--border); display:none; }
+.gps-status.show { display:block; }
+.gps-status.ok { background:var(--teal-bg); color:var(--teal-dark); border-color:var(--teal-border); }
+.gps-status.err { background:var(--coral-bg); color:var(--coral-dark); border-color:var(--coral-border); }
 .ib { width: 34px; height: 34px; border: none; background: none; cursor: pointer; color: var(--text3); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
 .ib:active { background: var(--surface2); }
 
@@ -420,7 +486,7 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="brand">
-    <div class="brand-icon"><img src="pkpj.png" style="width: 45px; height: 45px;"></div>
+    <div class="brand-icon"><svg class="ti ti-notebook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-notebook"/></svg></div>
     <div>
       <div class="brand-name">Logbook PKPJ</div>
       <div class="brand-sub">Work task tracker</div>
@@ -677,9 +743,20 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
           </select>
           <textarea id="c-ke" placeholder="Taip alamat destinasi…"></textarea>
         </div>
-        <div class="two">
-          <div class="field"><label>Jarak satu hala (km)</label><input type="number" id="c-jarak" step="0.01" min="0" placeholder="15.80" /></div>
-          <div class="field"><label></label></div>
+        <div class="field">
+          <label>Jarak satu hala (km)</label>
+          <input type="number" id="c-jarak" step="0.01" min="0" placeholder="15.80" />
+          <div class="gps-row">
+            <button class="gps-btn" onclick="gpsCapture('dari')" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+              GPS lokasi saya
+            </button>
+            <button class="gps-btn" onclick="gpsCalcDistance()" type="button" id="gps-calc-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19l4-14M20 19l-4-14M11 5h2M10 9h4M10 13h4M10 17h4"/></svg>
+              Kira jarak auto
+            </button>
+          </div>
+          <div class="gps-status" id="gps-status"></div>
         </div>
         <div class="two">
           <div class="field"><label>Bertolak (Pergi)</label>
@@ -848,6 +925,41 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
     </div>
   </div>
 
+
+  <!-- ══ TUGASAN (TASKS) SCREEN ══ -->
+  <div class="screen" id="scr-task">
+    <div class="task-toolbar">
+      <div class="task-add-row">
+        <input type="text" id="task-input" placeholder="Tambah tugasan baharu…" onkeydown="if(event.key==='Enter')addTask()" />
+        <button class="task-add-btn" onclick="addTask()" aria-label="Tambah tugasan">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+      <div class="task-filters">
+        <button class="tfilter active" id="tf-all" onclick="setTaskFilter('all')">Semua</button>
+        <button class="tfilter" id="tf-today" onclick="setTaskFilter('today')">Hari ini</button>
+        <button class="tfilter" id="tf-overdue" onclick="setTaskFilter('overdue')">Lewat</button>
+        <button class="tfilter" id="tf-active" onclick="setTaskFilter('active')">Belum siap</button>
+        <button class="tfilter" id="tf-done" onclick="setTaskFilter('done')">Selesai</button>
+      </div>
+    </div>
+    <div class="task-stats">
+      <div class="tstat"><div class="tstat-v" id="ts-total">0</div><div class="tstat-l">Jumlah</div></div>
+      <div class="tstat"><div class="tstat-v" id="ts-active" style="color:var(--amber-dark)">0</div><div class="tstat-l">Belum siap</div></div>
+      <div class="tstat"><div class="tstat-v" id="ts-overdue" style="color:var(--coral-dark)">0</div><div class="tstat-l">Lewat</div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="task-progress" style="width:0%"></div></div>
+      <div class="progress-txt"><span id="progress-label">0 dari 0 selesai</span><span id="progress-pct">0%</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="task-list" id="task-list"></div>
+    <div class="task-empty" id="task-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3l8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
+      <p>Tiada tugasan. Tambah tugasan pertama anda di atas.</p>
+    </div>
+  </div>
+
   <div class="toast-wrap"><div class="toast" id="toast" role="status" aria-live="polite"></div></div>
 </div><!-- end main-content -->
 
@@ -856,8 +968,55 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
   <button class="bnav active" id="nav-cal" onclick="sw('cal')"><svg class="ti ti-calendar-month" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-calendar-month"/></svg>Kalendar<div class="bnav-dot"></div></button>
   <button class="bnav" id="nav-log" onclick="sw('log')"><svg class="ti ti-plus-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-plus-circle"/></svg>Log<div class="bnav-dot"></div></button>
   <button class="bnav" id="nav-list" onclick="sw('list')"><svg class="ti ti-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-list"/></svg>Rekod<div class="bnav-dot"></div></button>
+  <button class="bnav" id="nav-task" onclick="sw('task')"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3l8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>Tugasan<div class="bnav-dot"></div></button>
   <button class="bnav" id="nav-chart" onclick="sw('chart')"><svg class="ti ti-chart-donut" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-chart-donut"/></svg>Chart<div class="bnav-dot"></div></button>
   <button class="bnav" id="nav-sum" onclick="sw('sum')"><svg class="ti ti-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-file-text"/></svg>Laporan<div class="bnav-dot"></div></button>
+</div>
+
+<!-- TASK EDIT MODAL -->
+<div class="tm-ov" id="tm-ov" onclick="if(event.target===this)closeTaskModal()">
+  <div class="tm-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span style="font-size:15px;font-weight:600;color:var(--text)">Butiran tugasan</span>
+      <button class="ib" onclick="closeTaskModal()" aria-label="Tutup"><svg class="ti ti-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-x"/></svg></button>
+    </div>
+    <div class="field"><label>Tajuk tugasan</label><input type="text" id="tm-title" /></div>
+    <div class="two" style="margin-top:10px">
+      <div class="field"><label>Keutamaan</label>
+        <select id="tm-prio">
+          <option value="high">Tinggi</option>
+          <option value="med" selected>Sederhana</option>
+          <option value="low">Rendah</option>
+        </select>
+      </div>
+      <div class="field"><label>Tarikh akhir</label><input type="date" id="tm-due" /></div>
+    </div>
+    <div class="field" style="margin-top:10px"><label>Kategori</label>
+      <select id="tm-cat">
+        <option>Teknikal IT</option><option>Programming</option><option>Semakan Email</option>
+        <option>Johor Pay</option><option>Semakan Dokumen</option><option>Kerja Pejabat</option>
+        <option>Kerja Luar</option><option>Khidmat Kaunter ICT</option><option>Others</option>
+      </select>
+    </div>
+    <div class="field" style="margin-top:10px"><label>Nota</label><textarea id="tm-note" placeholder="Butiran tambahan…"></textarea></div>
+    <div style="margin-top:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:7px">Sub-tugasan (checklist)</label>
+      <div id="tm-subtasks"></div>
+      <div class="subtask-add">
+        <input type="text" id="tm-sub-input" placeholder="Tambah sub-tugasan…" onkeydown="if(event.key==='Enter')addSubtask()" />
+        <button class="btn btn-sm" onclick="addSubtask()" style="width:auto;padding:0 12px">Tambah</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px">
+      <button class="btn" onclick="closeTaskModal()">Batal</button>
+      <button class="btn btn-p" onclick="saveTaskModal()"><svg class="ti ti-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-check"/></svg> Simpan</button>
+    </div>
+    <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border)">
+      <button class="btn" onclick="convertTaskToLog()" style="height:38px;font-size:12px;background:var(--teal-bg);color:var(--teal-dark);border-color:var(--teal-border)">
+        <svg class="ti ti-plus-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-plus-circle"/></svg> Tandakan selesai &amp; Log sebagai entry
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- CUSTOM TIME PICKER -->
@@ -933,6 +1092,31 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
     <div class="setup-code">/* ── Paste this ENTIRE code into Apps Script, then redeploy ── */
 
 function doGet(e) {
+  var p = e.parameter || {};
+  /* GPS — kira jarak jalan raya antara 2 alamat */
+  if (p.action === 'distance') {
+    try {
+      var dir = Maps.newDirectionFinder()
+        .setOrigin(p.from).setDestination(p.to).setMode(Maps.DirectionFinder.Mode.DRIVING)
+        .getDirections();
+      if (!dir.routes || !dir.routes.length)
+        return out(JSON.stringify({error:'Alamat tidak dijumpai'}));
+      var leg = dir.routes[0].legs[0];
+      return out(JSON.stringify({
+        km: (leg.distance.value/1000).toFixed(2),
+        mins: Math.round(leg.duration.value/60)
+      }));
+    } catch(err) { return out(JSON.stringify({error:String(err)})); }
+  }
+  /* GPS — tukar koordinat kepada alamat */
+  if (p.action === 'geocode') {
+    try {
+      var r = Maps.newGeocoder().reverseGeocode(Number(p.lat), Number(p.lng));
+      if (r.results && r.results.length)
+        return out(JSON.stringify({address: r.results[0].formatted_address}));
+      return out(JSON.stringify({error:'Alamat tidak dijumpai'}));
+    } catch(err) { return out(JSON.stringify({error:String(err)})); }
+  }
   return out(JSON.stringify(
     getSheet('Log').getDataRange().getValues()
   ));
@@ -1153,13 +1337,14 @@ function rmFmt(v) { return `RM${(parseFloat(v)||0).toFixed(2)}`; }
    NAV
 ═══════════════════════════════════ */
 function sw(tab) {
-  ['cal','log','list','chart','sum'].forEach(t => {
+  ['cal','log','list','task','chart','sum'].forEach(t => {
     document.getElementById('nav-'+t).classList.toggle('active', t===tab);
     document.getElementById('scr-'+t).classList.toggle('active', t===tab);
   });
   if (tab==='list') renderList();
   if (tab==='chart') renderCharts();
   if (tab==='cal') renderCal();
+  if (tab==='task') renderTasks();
 }
 
 /* ═══════════════════════════════════
@@ -2457,6 +2642,305 @@ function calcOT() {
   document.getElementById('f-ot-dur').value = hours % 1 === 0 ? hours : hours.toFixed(2).replace(/\.?0+$/, '');
 }
 
+
+/* ═══════════════════════════════════
+   TASK MANAGER (TUGASAN)
+═══════════════════════════════════ */
+let tasks = [];
+let taskFilter = 'all';
+let editingTaskId = null;
+let tmSubtasks = [];
+
+const PRIO_LABEL = { high:'Tinggi', med:'Sederhana', low:'Rendah' };
+const PRIO_CLASS = { high:'prio-high', med:'prio-med', low:'prio-low' };
+
+function saveTasks() {
+  try { localStorage.setItem('lb6_tasks', JSON.stringify(tasks)); } catch(x) {}
+}
+
+function loadTasks() {
+  try { const s = localStorage.getItem('lb6_tasks'); if (s) tasks = JSON.parse(s); } catch(x) {}
+  renderTasks();
+}
+
+function addTask() {
+  const input = document.getElementById('task-input');
+  const title = input.value.trim();
+  if (!title) { toast('Taip tajuk tugasan', 'ti-alert-circle'); return; }
+  tasks.unshift({
+    id: uid(), title, done: false, prio: 'med',
+    due: '', cat: 'Teknikal IT', note: '', subtasks: [],
+    created: new Date().toISOString()
+  });
+  input.value = '';
+  saveTasks(); renderTasks();
+  toast('Tugasan ditambah', 'ti-check');
+}
+
+function toggleTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  if (t.done) t.doneAt = new Date().toISOString();
+  saveTasks(); renderTasks();
+  toast(t.done ? 'Tugasan selesai ✓' : 'Tugasan dibuka semula', 'ti-check');
+}
+
+function delTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks(); renderTasks();
+  toast('Tugasan dipadam', 'ti-trash');
+}
+
+function setTaskFilter(f) {
+  taskFilter = f;
+  ['all','today','overdue','active','done'].forEach(x =>
+    document.getElementById('tf-'+x).classList.toggle('active', x === f));
+  renderTasks();
+}
+
+function isOverdue(t) {
+  if (!t.due || t.done) return false;
+  return t.due < td();
+}
+
+function isDueToday(t) {
+  return t.due === td();
+}
+
+function getFilteredTasks() {
+  return tasks.filter(t => {
+    if (taskFilter === 'done') return t.done;
+    if (taskFilter === 'active') return !t.done;
+    if (taskFilter === 'today') return isDueToday(t);
+    if (taskFilter === 'overdue') return isOverdue(t);
+    return true;
+  });
+}
+
+function renderTasks() {
+  const list = getFilteredTasks();
+  const el = document.getElementById('task-list');
+  const empty = document.getElementById('task-empty');
+  /* Stats */
+  const total = tasks.length;
+  const done = tasks.filter(t => t.done).length;
+  const active = total - done;
+  const overdue = tasks.filter(isOverdue).length;
+  document.getElementById('ts-total').textContent = total;
+  document.getElementById('ts-active').textContent = active;
+  document.getElementById('ts-overdue').textContent = overdue;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('task-progress').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done} dari ${total} selesai`;
+  document.getElementById('progress-pct').textContent = pct + '%';
+
+  if (!list.length) { el.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  /* Sort: overdue first, then by priority, then by due date */
+  const prioOrder = { high:0, med:1, low:2 };
+  const sorted = [...list].sort((a,b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    const ao = isOverdue(a), bo = isOverdue(b);
+    if (ao !== bo) return ao ? -1 : 1;
+    if (prioOrder[a.prio] !== prioOrder[b.prio]) return prioOrder[a.prio] - prioOrder[b.prio];
+    if (a.due && b.due) return a.due.localeCompare(b.due);
+    if (a.due) return -1;
+    if (b.due) return 1;
+    return 0;
+  });
+
+  el.innerHTML = sorted.map(t => {
+    const subDone = (t.subtasks||[]).filter(s => s.done).length;
+    const subTotal = (t.subtasks||[]).length;
+    const catCls = CMAP[t.cat] || 'cat-oth';
+    let duePill = '';
+    if (t.due) {
+      const d = new Date(t.due + 'T00:00');
+      const label = d.toLocaleDateString('ms-MY', {day:'numeric', month:'short'});
+      let cls = '', txt = label;
+      if (isOverdue(t)) { cls = 'overdue'; txt = 'Lewat · ' + label; }
+      else if (isDueToday(t)) { cls = 'today'; txt = 'Hari ini'; }
+      duePill = `<span class="due-pill ${cls}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>${txt}</span>`;
+    }
+    return `<div class="task-item ${t.done?'done':''}">
+      <button class="task-check ${t.done?'checked':''}" onclick="toggleTask('${t.id}')" aria-label="Tanda selesai">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5l10-10"/></svg>
+      </button>
+      <div class="task-body">
+        <div class="task-title">${t.title}</div>
+        <div class="task-meta">
+          <span class="prio ${PRIO_CLASS[t.prio]}">${PRIO_LABEL[t.prio]}</span>
+          <span class="badge ${catCls}">${t.cat}</span>
+          ${duePill}
+          ${subTotal ? `<span class="due-pill">${subDone}/${subTotal} sub</span>` : ''}
+        </div>
+        ${t.note ? `<div class="task-note">${t.note.length>70?t.note.slice(0,70)+'…':t.note}</div>` : ''}
+      </div>
+      <div class="task-acts">
+        <button class="ib" onclick="openTaskModal('${t.id}')" aria-label="Edit"><svg class="ti ti-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-edit"/></svg></button>
+        <button class="ib" onclick="delTask('${t.id}')" aria-label="Padam"><svg class="ti ti-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-trash"/></svg></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Task modal ── */
+function openTaskModal(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  editingTaskId = id;
+  tmSubtasks = JSON.parse(JSON.stringify(t.subtasks || []));
+  document.getElementById('tm-title').value = t.title;
+  document.getElementById('tm-prio').value = t.prio || 'med';
+  document.getElementById('tm-due').value = t.due || '';
+  document.getElementById('tm-cat').value = t.cat || 'Teknikal IT';
+  document.getElementById('tm-note').value = t.note || '';
+  renderSubtasks();
+  document.getElementById('tm-ov').classList.add('open');
+}
+
+function closeTaskModal() {
+  document.getElementById('tm-ov').classList.remove('open');
+  editingTaskId = null; tmSubtasks = [];
+}
+
+function renderSubtasks() {
+  const el = document.getElementById('tm-subtasks');
+  if (!tmSubtasks.length) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0">Tiada sub-tugasan lagi.</div>'; return; }
+  el.innerHTML = tmSubtasks.map((s, i) => `<div class="subtask-row">
+    <button class="subtask-check ${s.done?'checked':''}" onclick="toggleSubtask(${i})" aria-label="Tanda">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5l10-10"/></svg>
+    </button>
+    <span class="subtask-txt ${s.done?'done':''}">${s.text}</span>
+    <button class="ib" style="width:28px;height:28px" onclick="delSubtask(${i})" aria-label="Padam">
+      <svg class="ti ti-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#ti-x"/></svg>
+    </button>
+  </div>`).join('');
+}
+
+function addSubtask() {
+  const inp = document.getElementById('tm-sub-input');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  tmSubtasks.push({ text: txt, done: false });
+  inp.value = '';
+  renderSubtasks();
+}
+
+function toggleSubtask(i) { tmSubtasks[i].done = !tmSubtasks[i].done; renderSubtasks(); }
+function delSubtask(i) { tmSubtasks.splice(i,1); renderSubtasks(); }
+
+function saveTaskModal() {
+  const t = tasks.find(x => x.id === editingTaskId);
+  if (!t) return;
+  const newTitle = document.getElementById('tm-title').value.trim();
+  if (!newTitle) { toast('Tajuk diperlukan', 'ti-alert-circle'); return; }
+  t.title = newTitle;
+  t.prio = document.getElementById('tm-prio').value;
+  t.due = document.getElementById('tm-due').value;
+  t.cat = document.getElementById('tm-cat').value;
+  t.note = document.getElementById('tm-note').value.trim();
+  t.subtasks = tmSubtasks;
+  saveTasks(); renderTasks(); closeTaskModal();
+  toast('Tugasan dikemaskini', 'ti-check');
+}
+
+/* Convert task → log entry */
+function convertTaskToLog() {
+  const t = tasks.find(x => x.id === editingTaskId);
+  if (!t) return;
+  t.done = true;
+  t.doneAt = new Date().toISOString();
+  saveTasks();
+  /* Prefill log form */
+  const today = td();
+  document.getElementById('f-date').value = t.due || today;
+  document.getElementById('f-title').value = t.title;
+  document.getElementById('f-cat').value = t.cat || 'Teknikal IT';
+  document.getElementById('f-notes').value = t.note || '';
+  document.getElementById('f-time-start').value = '08:00';
+  document.getElementById('f-time-end').value = '17:00';
+  tpSetDisp('f-time-start','08:00'); tpSetDisp('f-time-end','17:00');
+  document.getElementById('f-dt').value = `${t.due||today}T08:00`;
+  document.getElementById('f-dur').value = '9';
+  onCatChange();
+  closeTaskModal(); renderTasks();
+  sw('log');
+  toast('Tugasan selesai — sila lengkapkan log entry', 'ti-check');
+}
+
+/* ═══════════════════════════════════
+   GPS + AUTO DISTANCE
+═══════════════════════════════════ */
+function gpsStatus(msg, type) {
+  const el = document.getElementById('gps-status');
+  el.textContent = msg;
+  el.className = 'gps-status show' + (type ? ' ' + type : '');
+}
+
+function gpsCapture(field) {
+  if (!navigator.geolocation) { gpsStatus('Peranti tidak sokong GPS', 'err'); return; }
+  gpsStatus('Mengesan lokasi anda…');
+  navigator.geolocation.getCurrentPosition(
+    async pos => {
+      const { latitude, longitude } = pos.coords;
+      gpsStatus(`Lokasi dikesan (${latitude.toFixed(5)}, ${longitude.toFixed(5)}) — mencari alamat…`);
+      /* Reverse geocode via Apps Script Maps service */
+      if (sheetUrl && connected) {
+        try {
+          const res = await fetch(`${sheetUrl}?action=geocode&lat=${latitude}&lng=${longitude}`, { redirect:'follow' });
+          const data = await res.json();
+          if (data.address) {
+            document.getElementById('c-dari-sel').value = 'lain';
+            onAlamatChange('dari');
+            document.getElementById('c-dari').value = data.address;
+            gpsStatus('✓ Alamat: ' + data.address, 'ok');
+            return;
+          }
+        } catch(x) {}
+      }
+      /* Fallback — use raw coords */
+      document.getElementById('c-dari-sel').value = 'lain';
+      onAlamatChange('dari');
+      document.getElementById('c-dari').value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+      gpsStatus('✓ Koordinat GPS disimpan (sambung Sheet untuk dapatkan alamat penuh)', 'ok');
+    },
+    err => {
+      const msgs = { 1:'Akses GPS ditolak — benarkan dalam tetapan browser', 2:'Lokasi tidak tersedia', 3:'Masa tamat — cuba lagi' };
+      gpsStatus(msgs[err.code] || 'Gagal mengesan lokasi', 'err');
+    },
+    { enableHighAccuracy:true, timeout:12000, maximumAge:0 }
+  );
+}
+
+async function gpsCalcDistance() {
+  const dari = getAlamat('dari');
+  const ke = getAlamat('ke');
+  if (!dari || !ke) { gpsStatus('Isi alamat Dari dan Ke dahulu', 'err'); return; }
+  if (!sheetUrl || !connected) { gpsStatus('Sambung ke Google Sheet dahulu untuk kira jarak auto', 'err'); return; }
+  const btn = document.getElementById('gps-calc-btn');
+  btn.disabled = true;
+  gpsStatus('Mengira jarak jalan raya…');
+  try {
+    const url = `${sheetUrl}?action=distance&from=${encodeURIComponent(dari)}&to=${encodeURIComponent(ke)}`;
+    const res = await fetch(url, { redirect:'follow' });
+    const data = await res.json();
+    if (data.km) {
+      document.getElementById('c-jarak').value = data.km;
+      const durTxt = data.mins ? ` · anggaran ${data.mins} minit` : '';
+      gpsStatus(`✓ Jarak: ${data.km} km${durTxt} (pergi & balik: ${(data.km*2).toFixed(2)} km)`, 'ok');
+      toast('Jarak dikira ✓', 'ti-check');
+    } else {
+      gpsStatus(data.error || 'Tidak dapat kira jarak — semak alamat', 'err');
+    }
+  } catch(x) {
+    gpsStatus('Gagal — pastikan Apps Script dikemaskini dengan kod terkini', 'err');
+  }
+  btn.disabled = false;
+}
+
 /* ═══════════════════════════════════
    INIT
 ═══════════════════════════════════ */
@@ -2477,8 +2961,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('sum-date').value = today;
   initAlamat();
   loadLocal();
+  loadTasks();
 });
 </script>
 </body>
 </html>
-
