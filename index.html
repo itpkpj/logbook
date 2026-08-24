@@ -935,6 +935,13 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         </button>
       </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <span id="task-queue-badge" style="display:none;align-items:center;gap:4px;font-size:11px;padding:4px 9px;border-radius:20px;background:var(--amber-bg);color:var(--amber-dark);border:0.5px solid var(--amber-border);font-weight:600">
+        </span>
+        <button class="btn btn-sm" onclick="syncTasks()" style="margin-left:auto;width:auto">
+          <svg class="ti ti-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-refresh"/></svg> Sync
+        </button>
+      </div>
       <div class="task-filters">
         <button class="tfilter active" id="tf-all" onclick="setTaskFilter('all')">Semua</button>
         <button class="tfilter" id="tf-today" onclick="setTaskFilter('today')">Hari ini</button>
@@ -1117,6 +1124,12 @@ function doGet(e) {
       return out(JSON.stringify({error:'Alamat tidak dijumpai'}));
     } catch(err) { return out(JSON.stringify({error:String(err)})); }
   }
+  /* Tarik senarai tugasan */
+  if (p.action === 'getTasks') {
+    return out(JSON.stringify(
+      getSheet('Tugasan').getDataRange().getValues()
+    ));
+  }
   return out(JSON.stringify(
     getSheet('Log').getDataRange().getValues()
   ));
@@ -1146,6 +1159,22 @@ function doPost(e) {
     getSheet('Tuntutan').appendRow([d.logId,d.tarikh,d.tujuan,
       d.dari,d.ke,d.jarak,d.tollP,d.tollB,d.parking,d.hotel,
       d.pelbagai,d.jumlah,d.bertolakP,d.tibaP,d.bertolakB,d.tibaB,new Date()]);
+  } else if (d.action === 'saveTask') {
+    var sh = getSheet('Tugasan');
+    var r = sh.getDataRange().getValues();
+    var row = [d.id,d.title,d.done,d.prio,d.due,d.cat,
+               d.note,d.subtasks,d.created,d.doneAt];
+    var found = false;
+    for (var i=1;i<r.length;i++)
+      if (String(r[i][0])==String(d.id)) {
+        sh.getRange(i+1,1,1,10).setValues([row]); found=true; break;
+      }
+    if (!found) sh.appendRow(row);
+  } else if (d.action === 'delTask') {
+    var sh2 = getSheet('Tugasan');
+    var r2 = sh2.getDataRange().getValues();
+    for (var j=r2.length-1;j>=1;j--)
+      if (String(r2[j][0])==String(d.id)) { sh2.deleteRow(j+1); break; }
   } else if (d.action === 'upload') {
     const fold = DriveApp.getFoldersByName('PKPJ Logbook').hasNext()
       ? DriveApp.getFoldersByName('PKPJ Logbook').next()
@@ -1173,6 +1202,16 @@ function getSheet(name) {
         .setFontWeight('bold').setFontSize(11);
       sh.setFrozenRows(1);
       sh.setColumnWidths(1,13,[80,140,220,130,80,120,200,200,140,300,80,80,70]);
+    }
+    if (name === 'Tugasan') {
+      const h = ['ID','Tajuk Tugasan','Status','Keutamaan','Tarikh Akhir',
+        'Kategori','Nota','Sub-tugasan (JSON)','Dicipta','Selesai Pada'];
+      sh.appendRow(h);
+      sh.getRange(1,1,1,h.length)
+        .setBackground('#085041').setFontColor('#FFFFFF')
+        .setFontWeight('bold').setFontSize(11);
+      sh.setFrozenRows(1);
+      sh.setColumnWidths(1,10,[90,260,90,90,100,130,220,240,150,150]);
     }
     if (name === 'Tuntutan') {
       const h = ['Log ID','Tarikh','Tujuan','Dari','Ke',
@@ -2255,6 +2294,7 @@ async function autoConnect() {
     setConn(true);
     document.getElementById('auto-bar-msg').textContent = '✓ Disambung & disinkron dengan Google Sheet';
     updStats(); renderCal();
+    flushTaskQueue().then(() => fetchTasks());
     setTimeout(() => bar.classList.remove('show'), 2500);
   } catch(x) {
     setConn(false);
@@ -2291,6 +2331,7 @@ async function connectSheet() {
     }
     setConn(true); toggleConn();
     toast('Disambung & disinkron ✓', 'ti-check'); updStats(); renderCal();
+    flushTaskQueue().then(() => fetchTasks());
   } catch(x) {
     setConn(false);
     toast('Gagal — semak URL & deployment settings', 'ti-alert-circle');
@@ -2660,7 +2701,113 @@ function saveTasks() {
 
 function loadTasks() {
   try { const s = localStorage.getItem('lb6_tasks'); if (s) tasks = JSON.parse(s); } catch(x) {}
+  try { const q = localStorage.getItem('lb6_taskq'); if (q) taskQueue = JSON.parse(q); } catch(x) {}
   renderTasks();
+}
+
+/* ── Offline queue — simpan operasi yang gagal hantar ── */
+let taskQueue = [];
+
+function saveQueue() {
+  try { localStorage.setItem('lb6_taskq', JSON.stringify(taskQueue)); } catch(x) {}
+}
+
+function queueTask(task, action) {
+  taskQueue = taskQueue.filter(q => !(q.task.id === task.id && q.action === action));
+  taskQueue.push({ task, action, at: Date.now() });
+  saveQueue();
+  updateQueueBadge();
+}
+
+function updateQueueBadge() {
+  const el = document.getElementById('task-queue-badge');
+  if (!el) return;
+  if (taskQueue.length) {
+    el.textContent = `${taskQueue.length} belum sync`;
+    el.style.display = 'inline-flex';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+/* Push satu task ke Sheet */
+async function pushTask(task, action) {
+  if (!sheetUrl || !connected) { queueTask(task, action); return false; }
+  try {
+    await fetch(sheetUrl, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify({
+        action: action === 'delete' ? 'delTask' : 'saveTask',
+        id: task.id,
+        title: task.title,
+        done: task.done ? 'Selesai' : 'Belum',
+        prio: task.prio,
+        due: task.due || '',
+        cat: task.cat || '',
+        note: task.note || '',
+        subtasks: JSON.stringify(task.subtasks || []),
+        created: task.created || '',
+        doneAt: task.doneAt || ''
+      })
+    });
+    return true;
+  } catch(x) {
+    queueTask(task, action);
+    return false;
+  }
+}
+
+/* Hantar semua yang tertunggak dalam queue */
+async function flushTaskQueue() {
+  if (!sheetUrl || !connected || !taskQueue.length) return;
+  const pending = [...taskQueue];
+  taskQueue = [];
+  saveQueue();
+  let ok = 0;
+  for (const item of pending) {
+    const success = await pushTask(item.task, item.action);
+    if (success) ok++;
+    await new Promise(r => setTimeout(r, 150));
+  }
+  updateQueueBadge();
+  if (ok) toast(`${ok} tugasan disync ke Sheet ✓`, 'ti-check');
+}
+
+/* Tarik tugasan dari Sheet */
+async function fetchTasks() {
+  if (!sheetUrl || !connected) return;
+  try {
+    const res = await fetch(sheetUrl + '?action=getTasks', { redirect: 'follow' });
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length < 2) return;
+    const remote = rows.slice(1).map(r => ({
+      id: String(r[0]),
+      title: r[1],
+      done: String(r[2]).toLowerCase() === 'selesai',
+      prio: r[3] || 'med',
+      due: r[4] ? normDate(r[4]) : '',
+      cat: r[5] || 'Teknikal IT',
+      note: r[6] || '',
+      subtasks: (() => { try { return JSON.parse(r[7] || '[]'); } catch(e) { return []; } })(),
+      created: r[8] || '',
+      doneAt: r[9] || ''
+    })).filter(t => t.title);
+    /* Merge — local wins jika ada dalam queue (belum sync) */
+    const queuedIds = new Set(taskQueue.map(q => q.task.id));
+    const merged = remote.filter(t => !queuedIds.has(t.id));
+    tasks.forEach(lt => { if (queuedIds.has(lt.id)) merged.push(lt); });
+    tasks = merged;
+    saveTasks(); renderTasks();
+  } catch(x) {}
+}
+
+async function syncTasks() {
+  if (!sheetUrl || !connected) { toast('Sambung ke Sheet dahulu', 'ti-alert-circle'); return; }
+  toast('Menyegerak tugasan…', 'ti-refresh');
+  await flushTaskQueue();
+  await fetchTasks();
+  toast('Tugasan disegerak ✓', 'ti-check');
 }
 
 function addTask() {
@@ -2674,6 +2821,7 @@ function addTask() {
   });
   input.value = '';
   saveTasks(); renderTasks();
+  pushTask(tasks[0], 'save');
   toast('Tugasan ditambah', 'ti-check');
 }
 
@@ -2683,12 +2831,15 @@ function toggleTask(id) {
   t.done = !t.done;
   if (t.done) t.doneAt = new Date().toISOString();
   saveTasks(); renderTasks();
+  pushTask(t, 'save');
   toast(t.done ? 'Tugasan selesai ✓' : 'Tugasan dibuka semula', 'ti-check');
 }
 
 function delTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
+  const t = tasks.find(x => x.id === id);
+  tasks = tasks.filter(x => x.id !== id);
   saveTasks(); renderTasks();
+  if (t) pushTask(t, 'delete');
   toast('Tugasan dipadam', 'ti-trash');
 }
 
@@ -2735,6 +2886,7 @@ function renderTasks() {
   document.getElementById('progress-label').textContent = `${done} dari ${total} selesai`;
   document.getElementById('progress-pct').textContent = pct + '%';
 
+  updateQueueBadge();
   if (!list.length) { el.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
 
@@ -2844,6 +2996,7 @@ function saveTaskModal() {
   t.note = document.getElementById('tm-note').value.trim();
   t.subtasks = tmSubtasks;
   saveTasks(); renderTasks(); closeTaskModal();
+  pushTask(t, 'save');
   toast('Tugasan dikemaskini', 'ti-check');
 }
 
@@ -2854,6 +3007,7 @@ function convertTaskToLog() {
   t.done = true;
   t.doneAt = new Date().toISOString();
   saveTasks();
+  pushTask(t, 'save');
   /* Prefill log form */
   const today = td();
   document.getElementById('f-date').value = t.due || today;
