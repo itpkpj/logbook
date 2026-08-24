@@ -1107,7 +1107,12 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
     </div>
     <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:8px"><strong>Langkah 1:</strong> Buka Google Sheet → Extensions → Apps Script</p>
     <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:6px"><strong>Langkah 2:</strong> Tampal kod ini:</p>
-    <div class="setup-code">/* ── Paste this ENTIRE code into Apps Script, then redeploy ── */
+    <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+      <button class="btn btn-sm btn-p" onclick="copyGSCode()" style="width:auto">
+        <svg class="ti ti-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-copy"/></svg> Salin kod
+      </button>
+    </div>
+    <div class="setup-code" id="gs-code">/* ── Paste this ENTIRE code into Apps Script, then redeploy ── */
 
 function doGet(e) {
   var p = e.parameter || {};
@@ -1130,7 +1135,7 @@ function doGet(e) {
   if (p.action === 'geocode') {
     try {
       var r = Maps.newGeocoder().reverseGeocode(Number(p.lat), Number(p.lng));
-      if (r.results && r.results.length)
+      if (r.results &amp;&amp; r.results.length)
         return out(JSON.stringify({address: r.results[0].formatted_address}));
       return out(JSON.stringify({error:'Alamat tidak dijumpai'}));
     } catch(err) { return out(JSON.stringify({error:String(err)})); }
@@ -1154,11 +1159,11 @@ function doPost(e) {
       d.claimJson||'',d.otMula||'',d.otTamat||'',d.otDur||'']);
   } else if (d.action === 'delete') {
     const sh=getSheet('Log'), r=sh.getDataRange().getValues();
-    for (let i=r.length-1;i>=1;i--)
+    for (let i=r.length-1;i&gt;=1;i--)
       if (r[i][0]==d.id) { sh.deleteRow(i+1); break; }
   } else if (d.action === 'update') {
     const sh=getSheet('Log'), r=sh.getDataRange().getValues();
-    for (let i=r.length-1;i>=1;i--)
+    for (let i=r.length-1;i&gt;=1;i--)
       if (r[i][0]==d.id) {
         sh.getRange(i+1,1,1,13).setValues([[d.id,d.datetime,d.title,
           d.category,d.duration,d.tags,d.notes,
@@ -1176,7 +1181,7 @@ function doPost(e) {
     var row = [d.id,d.title,d.done,d.prio,d.due,d.cat,
                d.note,d.subtasks,d.created,d.doneAt];
     var found = false;
-    for (var i=1;i<r.length;i++)
+    for (var i=1;i&lt;r.length;i++)
       if (String(r[i][0])==String(d.id)) {
         sh.getRange(i+1,1,1,10).setValues([row]); found=true; break;
       }
@@ -1184,7 +1189,7 @@ function doPost(e) {
   } else if (d.action === 'delTask') {
     var sh2 = getSheet('Tugasan');
     var r2 = sh2.getDataRange().getValues();
-    for (var j=r2.length-1;j>=1;j--)
+    for (var j=r2.length-1;j&gt;=1;j--)
       if (String(r2[j][0])==String(d.id)) { sh2.deleteRow(j+1); break; }
   } else if (d.action === 'upload') {
     const fold = DriveApp.getFoldersByName('PKPJ Logbook').hasNext()
@@ -3156,6 +3161,26 @@ async function gpsCalcDistance() {
     gpsStatus('Gagal — pastikan Apps Script dikemaskini dengan kod terkini', 'err');
   }
   btn.disabled = false;
+}
+
+
+function copyGSCode() {
+  const el = document.getElementById('gs-code');
+  const code = el.innerText || el.textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code)
+      .then(() => toast('Kod Apps Script disalin ✓', 'ti-copy'))
+      .catch(() => fallbackCopy(code));
+  } else fallbackCopy(code);
+}
+
+function fallbackCopy(txt) {
+  const ta = document.createElement('textarea');
+  ta.value = txt;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  document.execCommand('copy'); document.body.removeChild(ta);
+  toast('Kod disalin ✓', 'ti-copy');
 }
 
 /* ═══════════════════════════════════
