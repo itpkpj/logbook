@@ -343,6 +343,38 @@ body { display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; 
 .ot-title { font-size:12px; font-weight:600; color:var(--violet-dark); display:flex; align-items:center; gap:5px; }
 .ot-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 
+
+/* ── UPCOMING / CURRENT PANEL ── */
+.up-panel { margin:0 14px 12px; border:0.5px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); overflow:hidden; }
+.up-head { display:flex; align-items:center; justify-content:space-between; padding:11px 13px; background:var(--surface2); border-bottom:0.5px solid var(--border); cursor:pointer; user-select:none; }
+.up-head-l { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color:var(--text); }
+.up-count { font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; background:var(--blue-dark); color:#fff; }
+.up-count.zero { background:var(--surface); color:var(--text3); border:0.5px solid var(--border); }
+.up-chev { font-size:16px; color:var(--text3); transition:transform 0.2s; }
+.up-chev.closed { transform:rotate(-90deg); }
+.up-tabs { display:flex; gap:4px; padding:8px 13px; border-bottom:0.5px solid var(--border); overflow-x:auto; }
+.up-tab { padding:5px 11px; font-size:11px; border-radius:20px; border:0.5px solid var(--border-strong); background:none; cursor:pointer; color:var(--text2); font-family:var(--font); white-space:nowrap; flex-shrink:0; }
+.up-tab.active { background:var(--text); color:var(--surface); border-color:var(--text); }
+.up-body { max-height:340px; overflow-y:auto; }
+.up-group-hdr { font-size:10px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; padding:9px 13px 5px; background:var(--surface2); position:sticky; top:0; z-index:1; }
+.up-item { display:flex; gap:9px; padding:10px 13px; border-bottom:0.5px solid var(--border); align-items:flex-start; cursor:pointer; }
+.up-item:last-child { border-bottom:none; }
+.up-item:active { background:var(--surface2); }
+.up-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.up-icon svg { width:15px; height:15px; }
+.up-icon.log { background:var(--blue-bg); color:var(--blue-dark); }
+.up-icon.task { background:var(--teal-bg); color:var(--teal-dark); }
+.up-icon.task-hi { background:var(--coral-bg); color:var(--coral-dark); }
+.up-b { flex:1; min-width:0; }
+.up-t { font-size:13px; font-weight:500; color:var(--text); line-height:1.35; word-break:break-word; }
+.up-m { display:flex; gap:5px; align-items:center; flex-wrap:wrap; margin-top:4px; }
+.up-when { font-size:11px; font-weight:600; color:var(--blue-dark); background:var(--blue-bg); border:0.5px solid var(--blue-border); border-radius:20px; padding:2px 8px; white-space:nowrap; }
+.up-when.now { background:var(--coral-bg); color:var(--coral-dark); border-color:var(--coral-border); }
+.up-when.soon { background:var(--amber-bg); color:var(--amber-dark); border-color:var(--amber-border); }
+.up-empty { padding:2rem 1rem; text-align:center; color:var(--text3); }
+.up-empty svg { width:32px; height:32px; opacity:0.4; margin-bottom:7px; }
+.up-empty p { font-size:12px; line-height:1.5; }
+
 /* ── TASK PANE ── */
 .task-toolbar { padding:10px 14px; display:flex; flex-direction:column; gap:8px; }
 .task-add-row { display:flex; gap:7px; }
@@ -555,6 +587,27 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
 
   <!-- ══ CALENDAR SCREEN ══ -->
   <div class="screen active" id="scr-cal">
+    <!-- UPCOMING / CURRENT EVENTS -->
+    <div class="up-panel">
+      <div class="up-head" onclick="toggleUpPanel()">
+        <div class="up-head-l">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+          Semasa &amp; Akan Datang
+          <span class="up-count zero" id="up-count">0</span>
+        </div>
+        <svg class="up-chev" id="up-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6l6-6"/></svg>
+      </div>
+      <div id="up-content">
+        <div class="up-tabs">
+          <button class="up-tab active" id="uf-all" onclick="setUpFilter('all')">Semua</button>
+          <button class="up-tab" id="uf-today" onclick="setUpFilter('today')">Hari ini</button>
+          <button class="up-tab" id="uf-week" onclick="setUpFilter('week')">7 hari</button>
+          <button class="up-tab" id="uf-log" onclick="setUpFilter('log')">Log</button>
+          <button class="up-tab" id="uf-task" onclick="setUpFilter('task')">Tugasan</button>
+        </div>
+        <div class="up-body" id="up-body"></div>
+      </div>
+    </div>
     <div class="cal-hdr">
       <div><span class="cal-m" id="cal-m"></span><span class="cal-y" id="cal-y"></span></div>
       <div class="cal-navs">
@@ -1398,7 +1451,7 @@ function sw(tab) {
   });
   if (tab==='list') renderList();
   if (tab==='chart') renderCharts();
-  if (tab==='cal') renderCal();
+  if (tab==='cal') { renderCal(); renderUpcoming(); }
   if (tab==='task') renderTasks();
 }
 
@@ -1658,7 +1711,7 @@ function submitEntry() {
     toast('Entry disimpan', 'ti-check');
   }
   if (claimData) saveClaim(entry.id, claimData);
-  resetForm(); saveLocal(); updStats(); renderCal();
+  resetForm(); saveLocal(); updStats(); renderCal(); renderUpcoming();
 }
 
 /* ═══════════════════════════════════
@@ -2142,7 +2195,7 @@ function delEntry(id) {
   entries = entries.filter(e => e.id!==id);
   pushSheet({id}, 'delete');
   renderList(); if (selD) showDayPanel(selD);
-  renderCal(); saveLocal(); updStats();
+  renderCal(); renderUpcoming(); saveLocal(); updStats();
   toast('Entry dipadam', 'ti-trash');
 }
 
@@ -2286,7 +2339,7 @@ function loadLocal() {
       document.getElementById('conn-label').textContent = 'Connect';
     }
   } catch(x) {}
-  updStats(); renderCal();
+  updStats(); renderCal(); renderUpcoming();
   /* Auto-connect if URL is saved */
   if (sheetUrl) autoConnect();
 }
@@ -2844,7 +2897,7 @@ async function fetchTasks() {
     const merged = remote.filter(t => !queuedIds.has(t.id));
     tasks.forEach(lt => { if (queuedIds.has(lt.id)) merged.push(lt); });
     tasks = merged;
-    saveTasks(); renderTasks();
+    saveTasks(); renderTasks(); renderUpcoming();
   } catch(x) {
     console.warn('fetchTasks gagal:', x);
   }
@@ -2888,7 +2941,7 @@ function addTask() {
     created: new Date().toISOString()
   });
   input.value = '';
-  saveTasks(); renderTasks();
+  saveTasks(); renderTasks(); renderUpcoming();
   pushTask(tasks[0], 'save');
   toast('Tugasan ditambah', 'ti-check');
 }
@@ -2898,7 +2951,7 @@ function toggleTask(id) {
   if (!t) return;
   t.done = !t.done;
   if (t.done) t.doneAt = new Date().toISOString();
-  saveTasks(); renderTasks();
+  saveTasks(); renderTasks(); renderUpcoming();
   pushTask(t, 'save');
   toast(t.done ? 'Tugasan selesai ✓' : 'Tugasan dibuka semula', 'ti-check');
 }
@@ -2906,7 +2959,7 @@ function toggleTask(id) {
 function delTask(id) {
   const t = tasks.find(x => x.id === id);
   tasks = tasks.filter(x => x.id !== id);
-  saveTasks(); renderTasks();
+  saveTasks(); renderTasks(); renderUpcoming();
   if (t) pushTask(t, 'delete');
   toast('Tugasan dipadam', 'ti-trash');
 }
@@ -3063,7 +3116,7 @@ function saveTaskModal() {
   t.cat = document.getElementById('tm-cat').value;
   t.note = document.getElementById('tm-note').value.trim();
   t.subtasks = tmSubtasks;
-  saveTasks(); renderTasks(); closeTaskModal();
+  saveTasks(); renderTasks(); renderUpcoming(); closeTaskModal();
   pushTask(t, 'save');
   toast('Tugasan dikemaskini', 'ti-check');
 }
@@ -3164,6 +3217,194 @@ async function gpsCalcDistance() {
 }
 
 
+/* ═══════════════════════════════════
+   SEMASA & AKAN DATANG (UPCOMING)
+═══════════════════════════════════ */
+let upFilter = 'all';
+let upPanelOpen = true;
+
+function toggleUpPanel() {
+  upPanelOpen = !upPanelOpen;
+  document.getElementById('up-content').style.display = upPanelOpen ? 'block' : 'none';
+  document.getElementById('up-chev').classList.toggle('closed', !upPanelOpen);
+  try { localStorage.setItem('lb6_uppanel', upPanelOpen ? '1' : '0'); } catch(x) {}
+}
+
+function setUpFilter(f) {
+  upFilter = f;
+  ['all','today','week','log','task'].forEach(x =>
+    document.getElementById('uf-'+x).classList.toggle('active', x === f));
+  renderUpcoming();
+}
+
+/* Jarak hari dari hari ini — 0 = hari ini, 1 = esok, negatif = telah lepas */
+function daysFromToday(dateStr) {
+  if (!dateStr) return null;
+  const t = new Date(td() + 'T00:00');
+  const d = new Date(normDate(dateStr) + 'T00:00');
+  if (isNaN(d)) return null;
+  return Math.round((d - t) / 86400000);
+}
+
+function whenLabel(days) {
+  if (days === 0) return { txt:'Hari ini', cls:'now' };
+  if (days === 1) return { txt:'Esok', cls:'soon' };
+  if (days <= 7) return { txt:`${days} hari lagi`, cls:'soon' };
+  if (days <= 30) return { txt:`${days} hari lagi`, cls:'' };
+  return { txt:`${Math.round(days/30)} bulan lagi`, cls:'' };
+}
+
+function groupLabel(days) {
+  if (days === 0) return 'Hari ini';
+  if (days === 1) return 'Esok';
+  if (days <= 7) return 'Minggu ini';
+  if (days <= 30) return 'Bulan ini';
+  return 'Kemudian';
+}
+
+/* Kumpul semua item semasa & akan datang — TIADA yang telah lepas */
+function collectUpcoming() {
+  const items = [];
+
+  /* Log entries — hari ini & akan datang sahaja */
+  entries.forEach(e => {
+    if (!e.datetime) return;
+    /* Untuk kerja berbilang hari, guna tarikh tamat supaya kekal "semasa" */
+    const endRef = e.dtEnd || e.datetime;
+    const daysEnd = daysFromToday(endRef);
+    if (daysEnd === null || daysEnd < 0) return;   /* telah lepas — skip */
+    const daysStart = daysFromToday(e.datetime);
+    const isOngoing = e.dtEnd && daysStart <= 0 && daysEnd >= 0;
+    items.push({
+      kind: 'log',
+      id: e.id,
+      title: e.title || '(tiada tajuk)',
+      cat: e.category || 'Others',
+      date: normDate(e.datetime),
+      days: isOngoing ? 0 : Math.max(daysStart, 0),
+      time: (e.datetime.slice(11,16) || ''),
+      ongoing: isOngoing,
+      dur: e.duration || ''
+    });
+  });
+
+  /* Tugasan — belum selesai, tarikh akhir hari ini atau akan datang */
+  tasks.forEach(t => {
+    if (t.done) return;                 /* selesai — skip */
+    if (!t.due) return;                 /* tiada tarikh akhir — skip */
+    const days = daysFromToday(t.due);
+    if (days === null || days < 0) return;  /* telah lepas — skip */
+    items.push({
+      kind: 'task',
+      id: t.id,
+      title: t.title,
+      cat: t.cat || 'Others',
+      date: t.due,
+      days,
+      prio: t.prio || 'med',
+      subDone: (t.subtasks||[]).filter(s => s.done).length,
+      subTotal: (t.subtasks||[]).length
+    });
+  });
+
+  /* Susun: paling hampir dahulu; dalam hari sama — log ikut masa, task ikut keutamaan */
+  const prioOrder = { high:0, med:1, low:2 };
+  items.sort((a,b) => {
+    if (a.days !== b.days) return a.days - b.days;
+    if (a.kind !== b.kind) return a.kind === 'log' ? -1 : 1;
+    if (a.kind === 'log') return (a.time||'').localeCompare(b.time||'');
+    return prioOrder[a.prio] - prioOrder[b.prio];
+  });
+  return items;
+}
+
+function renderUpcoming() {
+  let items = collectUpcoming();
+
+  /* Tapis ikut tab */
+  if (upFilter === 'today') items = items.filter(i => i.days === 0);
+  else if (upFilter === 'week') items = items.filter(i => i.days <= 7);
+  else if (upFilter === 'log')  items = items.filter(i => i.kind === 'log');
+  else if (upFilter === 'task') items = items.filter(i => i.kind === 'task');
+
+  /* Kiraan sentiasa berdasarkan keseluruhan (bukan tapisan) */
+  const totalAll = collectUpcoming().length;
+  const badge = document.getElementById('up-count');
+  badge.textContent = totalAll;
+  badge.className = 'up-count' + (totalAll ? '' : ' zero');
+
+  const body = document.getElementById('up-body');
+  if (!items.length) {
+    body.innerHTML = `<div class="up-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/><path d="M9 16l2 2l4-4"/></svg>
+      <p>Tiada rekod semasa atau akan datang.<br>Semua tugasan terdahulu telah selesai.</p>
+    </div>`;
+    return;
+  }
+
+  let out = '', lastGroup = '';
+  items.forEach(i => {
+    const g = groupLabel(i.days);
+    if (g !== lastGroup) { out += `<div class="up-group-hdr">${g}</div>`; lastGroup = g; }
+    const w = i.ongoing ? { txt:'Sedang berlangsung', cls:'now' } : whenLabel(i.days);
+    const catCls = CMAP[i.cat] || 'cat-oth';
+    if (i.kind === 'log') {
+      out += `<div class="up-item" onclick="upGoToDate('${i.date}')">
+        <div class="up-icon log">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>
+        </div>
+        <div class="up-b">
+          <div class="up-t">${i.title}</div>
+          <div class="up-m">
+            <span class="up-when ${w.cls}">${w.txt}</span>
+            <span class="badge ${catCls}">${i.cat}</span>
+            ${i.time ? `<span class="pill">${fmt12(i.time)}</span>` : ''}
+            ${i.dur ? `<span class="pill">${i.dur}j</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    } else {
+      const iconCls = i.prio === 'high' ? 'task-hi' : 'task';
+      out += `<div class="up-item" onclick="upOpenTask('${i.id}')">
+        <div class="up-icon ${iconCls}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 11l3 3l8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
+        </div>
+        <div class="up-b">
+          <div class="up-t">${i.title}</div>
+          <div class="up-m">
+            <span class="up-when ${w.cls}">${w.txt}</span>
+            <span class="prio ${PRIO_CLASS[i.prio]||'prio-med'}">${PRIO_LABEL[i.prio]||'Sederhana'}</span>
+            <span class="badge ${catCls}">${i.cat}</span>
+            ${i.subTotal ? `<span class="pill">${i.subDone}/${i.subTotal} sub</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }
+  });
+  body.innerHTML = out;
+}
+
+/* Tap item log → buka tarikh tersebut dalam kalendar */
+function upGoToDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00');
+  if (isNaN(d)) return;
+  calY = d.getFullYear();
+  calM = d.getMonth();
+  selD = dateStr;
+  renderCal();
+  setTimeout(() => {
+    const p = document.getElementById('day-panel');
+    if (p) p.scrollIntoView({ behavior:'smooth', block:'center' });
+  }, 120);
+}
+
+/* Tap item tugasan → buka modal tugasan */
+function upOpenTask(id) {
+  sw('task');
+  setTimeout(() => openTaskModal(id), 150);
+}
+
+
 function copyGSCode() {
   const el = document.getElementById('gs-code');
   const code = el.innerText || el.textContent;
@@ -3204,6 +3445,13 @@ document.addEventListener('DOMContentLoaded', function() {
   initAlamat();
   loadLocal();
   loadTasks();
+  try {
+    const st = localStorage.getItem('lb6_uppanel');
+    if (st === '0') { upPanelOpen = false;
+      document.getElementById('up-content').style.display = 'none';
+      document.getElementById('up-chev').classList.add('closed'); }
+  } catch(x) {}
+  renderUpcoming();
 });
 </script>
 </body>
