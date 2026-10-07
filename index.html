@@ -786,83 +786,167 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
         <span style="font-size:11px;color:var(--amber-dark)">Kenyataan Tuntutan</span>
       </div>
       <div class="cs-body">
-        <!-- ADDRESS DROPDOWN -->
+
+        <!-- ═══════════ PERGI ═══════════ -->
+        <div class="leg-hdr">
+          <span class="leg-badge pergi">PERGI</span>
+          <span class="leg-sub">Perjalanan ke tempat bertugas</span>
+        </div>
+        <div class="leg-line"></div>
+
         <div class="field">
           <label>Dari (alamat berlepas)</label>
           <select id="c-dari-sel" onchange="onAlamatChange('dari')" style="margin-bottom:5px">
             <option value="pkpj">No 12, Jalan Melawati 8, Taman Melawati, 81300 Johor Bahru, Johor Darul Ta'zim</option>
-            <option value="ki">Aras 1 & 2, Bangunan Dato' Abdul Rahman Andak, Kota Iskandar, 79503 Iskandar Puteri, Johor</option>
+            <option value="ki">Aras 1 &amp; 2, Bangunan Dato' Abdul Rahman Andak, Kota Iskandar, 79503 Iskandar Puteri, Johor</option>
             <option value="lain">Alamat lain…</option>
           </select>
           <textarea id="c-dari" style="display:none" placeholder="Taip alamat berlepas…"></textarea>
         </div>
+
         <div class="field">
           <label>Ke (destinasi)</label>
           <select id="c-ke-sel" onchange="onAlamatChange('ke')" style="margin-bottom:5px">
             <option value="lain">Alamat lain…</option>
             <option value="pkpj">No 12, Jalan Melawati 8, Taman Melawati, 81300 Johor Bahru, Johor Darul Ta'zim</option>
-            <option value="ki">Aras 1 & 2, Bangunan Dato' Abdul Rahman Andak, Kota Iskandar, 79503 Iskandar Puteri, Johor</option>
+            <option value="ki">Aras 1 &amp; 2, Bangunan Dato' Abdul Rahman Andak, Kota Iskandar, 79503 Iskandar Puteri, Johor</option>
           </select>
-          <textarea id="c-ke" placeholder="Taip alamat destinasi…"></textarea>
+          <textarea id="c-ke" placeholder="cth: Tempat bertugas rasmi di Dewan Raya Putra (Dewan Serbaguna Bandar Putra)"></textarea>
         </div>
+
         <div class="field">
-          <label>Jarak satu hala (km)</label>
-          <input type="number" id="c-jarak" step="0.01" min="0" placeholder="15.80" />
-          <div class="gps-row">
-            <button class="gps-btn" onclick="gpsCapture('dari')" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
-              GPS lokasi saya
-            </button>
-            <button class="gps-btn" onclick="gpsCalcDistance()" type="button" id="gps-calc-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19l4-14M20 19l-4-14M11 5h2M10 9h4M10 13h4M10 17h4"/></svg>
-              Kira jarak auto
-            </button>
-          </div>
-          <div class="gps-status" id="gps-status"></div>
+          <label>Tujuan (Pergi)</label>
+          <textarea id="c-tujuan-p" placeholder="cth: Bertugas bagi reruai pameran sempena karnival 25 tahun Majlis Perbandaran Batu Pahat (MPBP)"></textarea>
+          <div class="hint">Kosongkan untuk guna Tajuk tugas sebagai tujuan.</div>
         </div>
+
         <div class="two">
           <div class="field"><label>Bertolak (Pergi)</label>
-            <div class="tp-trigger" onclick="tpOpen('c-bp',this)" tabindex="0"><span class="tp-val" id="c-bp-disp">08:00 AM</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
-            <input type="hidden" id="c-bp" value="08:00"/>
+            <div class="tp-trigger" onclick="tpOpen('c-bp',this)" tabindex="0"><span class="tp-val" id="c-bp-disp">07:00 AM</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
+            <input type="hidden" id="c-bp" value="07:00"/>
           </div>
           <div class="field"><label>Tiba (Pergi)</label>
             <div class="tp-trigger" onclick="tpOpen('c-tp',this)" tabindex="0"><span class="tp-val" id="c-tp-disp">--:-- --</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
             <input type="hidden" id="c-tp" value=""/>
           </div>
         </div>
+
         <div class="two">
-          <div class="field"><label>Bertolak (Balik)</label>
-            <div class="tp-trigger" onclick="tpOpen('c-bb',this)" tabindex="0"><span class="tp-val" id="c-bb-disp">--:-- --</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
-            <input type="hidden" id="c-bb" value=""/>
+          <div class="field"><label>Jarak Pergi (km)</label>
+            <input type="number" id="c-jarak" step="0.01" min="0" placeholder="134.00" />
           </div>
-          <div class="field"><label>Tiba (Balik)</label>
-            <div class="tp-trigger" onclick="tpOpen('c-tb',this)" tabindex="0"><span class="tp-val" id="c-tb-disp">05:00 PM</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
-            <input type="hidden" id="c-tb" value="17:00"/>
+          <div class="field"><label>Tol Pergi (RM)</label>
+            <input type="number" id="c-toll-p" step="0.01" min="0" placeholder="9.68" />
           </div>
         </div>
-        <div style="height:0.5px;background:var(--border)"></div>
-        <div style="font-size:12px;font-weight:600;color:var(--text2)">Perbelanjaan tuntutan (RM)</div>
-        <div class="fare-row">
-          <label><svg class="ti ti-road" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-road"/></svg>Toll (Pergi)</label>
-          <input type="number" id="c-toll-p" step="0.10" min="0" placeholder="0.00" />
+
+        <div class="gps-row">
+          <button class="gps-btn" onclick="gpsCapture('dari')" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+            GPS lokasi saya
+          </button>
+          <button class="gps-btn" onclick="gpsCalcDistance()" type="button" id="gps-calc-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19l4-14M20 19l-4-14M11 5h2M10 9h4M10 13h4M10 17h4"/></svg>
+            Kira jarak auto
+          </button>
         </div>
-        <div class="fare-row">
-          <label><svg class="ti ti-road" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-road"/></svg>Toll (Balik)</label>
-          <input type="number" id="c-toll-b" step="0.10" min="0" placeholder="0.00" />
+        <div class="gps-status" id="gps-status"></div>
+
+        <!-- ═══════════ BALIK ═══════════ -->
+        <div class="leg-hdr" style="margin-top:14px">
+          <span class="leg-badge balik">BALIK</span>
+          <span class="leg-sub">Perjalanan pulang</span>
         </div>
+        <div class="leg-line"></div>
+
+        <label class="chk-row" for="c-balik-on">
+          <input type="checkbox" id="c-balik-on" checked onchange="toggleBalik()" />
+          <span>Sertakan perjalanan balik (tuntutan dua hala)</span>
+        </label>
+
+        <div id="balik-fields">
+          <div class="field">
+            <label>Dari (balik)</label>
+            <select id="c-dari-b-sel" onchange="onAlamatChange('dari-b')" style="margin-bottom:5px">
+              <option value="auto">⇄ Sama seperti Ke (destinasi Pergi)</option>
+              <option value="lain">Alamat lain…</option>
+              <option value="pkpj">No 12, Jalan Melawati 8, Taman Melawati, 81300 Johor Bahru, Johor Darul Ta'zim</option>
+            <option value="ki">Aras 1 &amp; 2, Bangunan Dato' Abdul Rahman Andak, Kota Iskandar, 79503 Iskandar Puteri, Johor</option>
+            </select>
+            <textarea id="c-dari-b" style="display:none" placeholder="cth: Tempat bertugas dari reruai pameran sempena karnival 25 tahun MPBP"></textarea>
+          </div>
+
+          <div class="field">
+            <label>Ke (balik)</label>
+            <select id="c-ke-b-sel" onchange="onAlamatChange('ke-b')" style="margin-bottom:5px">
+              <option value="auto">⇄ Sama seperti Dari (alamat berlepas Pergi)</option>
+              <option value="lain">Alamat lain…</option>
+              <option value="pkpj">No 12, Jalan Melawati 8, Taman Melawati, 81300 Johor Bahru, Johor Darul Ta'zim</option>
+            <option value="ki">Aras 1 &amp; 2, Bangunan Dato' Abdul Rahman Andak, Kota Iskandar, 79503 Iskandar Puteri, Johor</option>
+            </select>
+            <textarea id="c-ke-b" style="display:none" placeholder="Taip alamat pulang…"></textarea>
+          </div>
+
+          <div class="field">
+            <label>Tujuan (Balik)</label>
+            <textarea id="c-tujuan-b" placeholder="Auto: Selesai bertugas dari …"></textarea>
+            <button type="button" class="mini-btn" onclick="autoTujuanBalik(true)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8.1 8.1 0 0 0-15.5-2m-.5-4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg>
+              Jana auto dari Tujuan Pergi
+            </button>
+          </div>
+
+          <div class="two">
+            <div class="field"><label>Bertolak (Balik)</label>
+              <div class="tp-trigger" onclick="tpOpen('c-bb',this)" tabindex="0"><span class="tp-val" id="c-bb-disp">05:15 PM</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
+            <input type="hidden" id="c-bb" value="17:15"/>
+            </div>
+            <div class="field"><label>Tiba (Balik)</label>
+              <div class="tp-trigger" onclick="tpOpen('c-tb',this)" tabindex="0"><span class="tp-val" id="c-tb-disp">--:-- --</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg></div>
+            <input type="hidden" id="c-tb" value=""/>
+            </div>
+          </div>
+
+          <div class="two">
+            <div class="field"><label>Jarak Balik (km)</label>
+              <input type="number" id="c-jarak-b" step="0.01" min="0" placeholder="120.00" />
+            </div>
+            <div class="field"><label>Tol Balik (RM)</label>
+              <input type="number" id="c-toll-b" step="0.01" min="0" placeholder="7.46" />
+            </div>
+          </div>
+          <div class="hint">Jarak balik boleh berbeza dari pergi (contoh: ikut jalan lain).</div>
+        </div>
+
+        <!-- ═══════════ PERBELANJAAN LAIN ═══════════ -->
+        <div class="leg-hdr" style="margin-top:14px">
+          <span class="leg-badge lain">LAIN</span>
+          <span class="leg-sub">Perbelanjaan tambahan (RM)</span>
+        </div>
+        <div class="leg-line"></div>
+
+        <div class="field">
+          <label>Masukkan dalam baris</label>
+          <select id="c-extra-row">
+            <option value="b">Baris Balik</option>
+            <option value="p">Baris Pergi</option>
+          </select>
+        </div>
+
         <div class="fare-row">
           <label><svg class="ti ti-parking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-parking"/></svg>Parking</label>
-          <input type="number" id="c-parking" step="0.10" min="0" placeholder="0.00" />
+          <input type="number" id="c-parking" step="0.01" min="0" placeholder="0.00" />
         </div>
         <div class="fare-row">
           <label><svg class="ti ti-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-building"/></svg>Hotel</label>
-          <input type="number" id="c-hotel" step="0.10" min="0" placeholder="0.00" />
+          <input type="number" id="c-hotel" step="0.01" min="0" placeholder="0.00" />
         </div>
         <div class="fare-row">
           <label><svg class="ti ti-shopping-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-shopping-bag"/></svg>Belanja pelbagai</label>
-          <input type="number" id="c-pelbagai" step="0.10" min="0" placeholder="0.00" />
+          <input type="number" id="c-pelbagai" step="0.01" min="0" placeholder="0.00" />
         </div>
-        <button class="btn btn-amber" onclick="generateClaim()" style="margin-top:4px">
+
+        <button class="btn btn-amber" onclick="generateClaim()" style="margin-top:10px">
           <svg class="ti ti-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-file-text"/></svg> Jana Kenyataan Tuntutan
         </button>
       </div>
@@ -875,52 +959,27 @@ svg.ti { display:inline-block; vertical-align:-0.15em; width:1em; height:1em; ov
         <div class="co-hdr-sub" id="co-sub"></div>
       </div>
 
-      <div class="trip-row">
-        <div class="tr-hdr">
-          <span class="tr-badge pergi">Pergi</span>
-          <span class="tr-time" id="p-waktu"></span>
-        </div>
-        <div class="tc-r"><div class="tc-lbl">Tarikh</div><div class="tc-val" id="p-tarikh"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Bertolak</div><div class="tc-val" id="p-bertolak"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Tiba</div><div class="tc-val" id="p-tiba"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Dari</div><div class="tc-val" id="p-dari"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Ke</div><div class="tc-val" id="p-ke"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Tujuan</div><div class="tc-val" id="p-tujuan"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Jarak</div><div class="tc-val" id="p-jarak"></div></div>
-        <div class="tc-r" id="p-toll-r" style="display:none"><div class="tc-lbl">Toll</div><div class="tc-val" id="p-toll"></div></div>
-        <div class="tc-r" id="p-park-r" style="display:none"><div class="tc-lbl">Parking</div><div class="tc-val" id="p-parking"></div></div>
-        <div class="tc-r" id="p-hotel-r" style="display:none"><div class="tc-lbl">Hotel</div><div class="tc-val" id="p-hotel"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Layak tuntut</div><div class="tc-val" id="p-layak"></div></div>
-      </div>
-
-      <div class="trip-row" id="balik-row">
-        <div class="tr-hdr">
-          <span class="tr-badge balik">Balik</span>
-          <span class="tr-time" id="b-waktu"></span>
-        </div>
-        <div class="tc-r"><div class="tc-lbl">Tarikh</div><div class="tc-val" id="b-tarikh"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Bertolak</div><div class="tc-val" id="b-bertolak"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Tiba</div><div class="tc-val" id="b-tiba"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Dari</div><div class="tc-val" id="b-dari"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Ke</div><div class="tc-val" id="b-ke"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Tujuan</div><div class="tc-val" id="b-tujuan"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Jarak</div><div class="tc-val" id="b-jarak"></div></div>
-        <div class="tc-r" id="b-toll-r" style="display:none"><div class="tc-lbl">Toll</div><div class="tc-val" id="b-toll"></div></div>
-        <div class="tc-r"><div class="tc-lbl">Layak tuntut</div><div class="tc-val" id="b-layak"></div></div>
-      </div>
+      <div class="kt-host" id="kt-host"></div>
+      <div class="kt-note">Jadual di atas mengikut format rasmi. Guna <strong>Salin jadual</strong> untuk tampal terus ke Excel atau Word dengan baris dan kolum kekal.</div>
 
       <div class="sum-title">Ringkasan tuntutan</div>
-      <div class="sum-row"><span class="sum-lbl">Jarak (pergi + balik)</span><span class="sum-val" id="sum-jarak"></span></div>
-      <div class="sum-row"><span class="sum-lbl">Toll (pergi)</span><span class="sum-val" id="sum-tp"></span></div>
-      <div class="sum-row"><span class="sum-lbl">Toll (balik)</span><span class="sum-val" id="sum-tb"></span></div>
+      <div class="sum-row"><span class="sum-lbl">Jarak Pergi</span><span class="sum-val" id="sum-jp"></span></div>
+      <div class="sum-row"><span class="sum-lbl">Jarak Balik</span><span class="sum-val" id="sum-jb"></span></div>
+      <div class="sum-row"><span class="sum-lbl">Jumlah jarak</span><span class="sum-val" id="sum-jarak"></span></div>
+      <div class="sum-row"><span class="sum-lbl">Tol (pergi)</span><span class="sum-val" id="sum-tp"></span></div>
+      <div class="sum-row"><span class="sum-lbl">Tol (balik)</span><span class="sum-val" id="sum-tb"></span></div>
       <div class="sum-row"><span class="sum-lbl">Parking</span><span class="sum-val" id="sum-park"></span></div>
       <div class="sum-row"><span class="sum-lbl">Hotel</span><span class="sum-val" id="sum-hotel"></span></div>
       <div class="sum-row"><span class="sum-lbl">Belanja pelbagai</span><span class="sum-val" id="sum-pelb"></span></div>
       <div class="sum-row total"><span class="sum-lbl">Jumlah tuntutan</span><span class="sum-val highlight" id="sum-total"></span></div>
 
-      <div style="display:flex;gap:7px;padding:10px 13px 13px">
-        <button class="btn btn-sm" onclick="copyClaim()" style="flex:1"><svg class="ti ti-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-copy"/></svg> Copy teks</button>
-        <button class="btn btn-sm btn-p" onclick="shareClaimWA()" style="flex:1"><svg class="ti ti-brand-whatsapp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-brand-whatsapp"/></svg> WhatsApp</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:10px 13px 6px">
+        <button class="btn btn-sm btn-p" onclick="copyClaimTable()"><svg class="ti ti-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-copy"/></svg> Salin jadual</button>
+        <button class="btn btn-sm" onclick="printClaim()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2"/><path d="M17 9V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4"/><rect x="7" y="13" width="10" height="8" rx="1"/></svg> Cetak / PDF</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 13px 13px">
+        <button class="btn btn-sm" onclick="copyClaim()"><svg class="ti ti-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-copy"/></svg> Salin teks</button>
+        <button class="btn btn-sm" onclick="shareClaimWA()"><svg class="ti ti-brand-whatsapp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ti-brand-whatsapp"/></svg> WhatsApp</button>
       </div>
     </div>
 
@@ -1234,9 +1293,12 @@ function doPost(e) {
         break;
       }
   } else if (d.action === 'addClaim') {
-    getSheet('Tuntutan').appendRow([d.logId,d.tarikh,d.tujuan,
-      d.dari,d.ke,d.jarak,d.tollP,d.tollB,d.parking,d.hotel,
-      d.pelbagai,d.jumlah,d.bertolakP,d.tibaP,d.bertolakB,d.tibaB,new Date()]);
+    getSheet('Tuntutan').appendRow([d.logId,d.tarikh,
+      d.tujuanP||d.tujuan||'',d.dari,d.ke,d.jarak,
+      d.bertolakP,d.tibaP,d.tollP,
+      d.tujuanB||'',d.dariB||'',d.keB||'',d.jarakB||'',
+      d.bertolakB||'',d.tibaB||'',d.tollB||'',
+      d.parking,d.hotel,d.pelbagai,d.jumlah,new Date()]);
   } else if (d.action === 'saveTask') {
     var sh = getSheet('Tugasan');
     var r = sh.getDataRange().getValues();
@@ -1292,16 +1354,19 @@ function getSheet(name) {
       sh.setColumnWidths(1,10,[90,260,90,90,100,130,220,240,150,150]);
     }
     if (name === 'Tuntutan') {
-      const h = ['Log ID','Tarikh','Tujuan','Dari','Ke',
-        'Jarak (km)','Toll Pergi','Toll Balik','Parking','Hotel',
-        'Belanja Pelbagai','Jumlah Tuntutan','Bertolak (Pergi)',
-        'Tiba (Pergi)','Bertolak (Balik)','Tiba (Balik)','Dicatat Pada'];
+      const h = ['Log ID','Tarikh',
+        'Tujuan (Pergi)','Dari (Pergi)','Ke (Pergi)','Jarak Pergi (km)',
+        'Bertolak (Pergi)','Tiba (Pergi)','Tol Pergi',
+        'Tujuan (Balik)','Dari (Balik)','Ke (Balik)','Jarak Balik (km)',
+        'Bertolak (Balik)','Tiba (Balik)','Tol Balik',
+        'Parking','Hotel','Belanja Pelbagai','Jumlah Tuntutan','Dicatat Pada'];
       sh.appendRow(h);
       sh.getRange(1,1,1,h.length)
         .setBackground('#854F0B').setFontColor('#FFFFFF')
         .setFontWeight('bold').setFontSize(11);
       sh.setFrozenRows(1);
-      sh.setColumnWidths(1,17,[80,90,200,200,200,80,80,80,80,80,100,110,100,100,100,100,130]);
+      sh.setColumnWidths(1,21,[80,110,200,200,200,90,95,90,80,
+        200,200,200,90,95,90,80,80,80,100,110,130]);
     }
   }
   return sh;
@@ -1404,26 +1469,55 @@ const ALAMAT = {
 };
 
 function onAlamatChange(field) {
-  const sel = document.getElementById(`c-${field}-sel`);
-  const ta  = document.getElementById(`c-${field}`);
-  const val = sel.value;
-  if (val === 'lain') {
+  const sel = document.getElementById('c-' + field + '-sel');
+  const ta  = document.getElementById('c-' + field);
+  if (!sel || !ta) return;
+  const v = sel.value;
+  if (v === 'lain') {
     ta.style.display = 'block';
-    ta.value = '';
+    if (ta.value && Object.values(ALAMAT).indexOf(ta.value) !== -1) ta.value = '';
     ta.focus();
+  } else if (v === 'auto') {
+    ta.style.display = 'none';
+    ta.value = '';
   } else {
     ta.style.display = 'none';
-    ta.value = ALAMAT[val] || '';
+    ta.value = ALAMAT[v] || '';
   }
+}
+
+function toggleBalik() {
+  const on = document.getElementById('c-balik-on').checked;
+  document.getElementById('balik-fields').style.display = on ? 'block' : 'none';
+}
+
+/* "Bertugas bagi X" -> "Selesai bertugas dari X" */
+function deriveTujuanBalik(tp) {
+  const t = (tp || '').trim();
+  if (!t) return 'Selesai bertugas rasmi';
+  let m = t.match(/^bertugas\s+(?:bagi|di|ke|untuk|sebagai|sempena|dalam|pada)\s+(.+)$/i);
+  if (m) return 'Selesai bertugas dari ' + m[1];
+  m = t.match(/^bertugas\s+(.+)$/i);
+  if (m) return 'Selesai bertugas ' + m[1];
+  return 'Selesai bertugas dari ' + t.charAt(0).toLowerCase() + t.slice(1);
+}
+
+function autoTujuanBalik(announce) {
+  const tp = (document.getElementById('c-tujuan-p').value || '').trim()
+          || (document.getElementById('f-title').value || '').trim();
+  document.getElementById('c-tujuan-b').value = deriveTujuanBalik(tp);
+  if (announce) toast('Tujuan balik dijana', 'ti-check');
 }
 
 /* Set default addresses on form load */
 function initAlamat() {
-  /* Default: Dari = PKPJ, Ke = lain (user fills destination) */
-  document.getElementById('c-dari-sel').value = 'pkpj';
-  onAlamatChange('dari');
-  document.getElementById('c-ke-sel').value = 'lain';
-  onAlamatChange('ke');
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.value = v; };
+  set('c-dari-sel', 'pkpj');   onAlamatChange('dari');
+  set('c-ke-sel',   'lain');   onAlamatChange('ke');
+  set('c-dari-b-sel', 'auto'); onAlamatChange('dari-b');
+  set('c-ke-b-sel',   'auto'); onAlamatChange('ke-b');
+  const chk = document.getElementById('c-balik-on');
+  if (chk) { chk.checked = true; toggleBalik(); }
 }
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 
@@ -1726,153 +1820,213 @@ function submitEntry() {
 /* ═══════════════════════════════════
    CLAIM LOGIC
 ═══════════════════════════════════ */
-/* Get resolved address from dropdown or custom textarea */
+/* Resolve an address from its dropdown + optional free-text box */
 function getAlamat(field) {
-  const sel = document.getElementById(`c-${field}-sel`);
-  if (sel.value === 'lain') return document.getElementById(`c-${field}`).value.trim();
-  return ALAMAT[sel.value] || '';
+  const sel = document.getElementById('c-' + field + '-sel');
+  if (!sel) return '';
+  const v = sel.value;
+  if (v === 'lain') return (document.getElementById('c-' + field).value || '').trim();
+  if (v === 'auto') {
+    if (field === 'dari-b') return getAlamat('ke');    /* balik bermula di destinasi pergi */
+    if (field === 'ke-b')   return getAlamat('dari');  /* balik tamat di alamat berlepas  */
+    return '';
+  }
+  return ALAMAT[v] || '';
+}
+
+const gnum = id => parseFloat((document.getElementById(id) || {}).value) || 0;
+const gstr = id => ((document.getElementById(id) || {}).value || '').trim();
+const HARI_BM = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+
+/* 01.08.2026 (Sabtu) */
+function fmtClaimDate(d) {
+  if (!d) return '';
+  const [y, m, day] = d.slice(0,10).split('-');
+  const dt = new Date(+y, +m - 1, +day);
+  const hari = isNaN(dt) ? '' : ' (' + HARI_BM[dt.getDay()] + ')';
+  return `${day}.${m}.${y}${hari}`;
+}
+
+/* 07.00am  /  5.15pm  — pad pagi, tanpa pad petang (ikut borang rasmi) */
+function fmtClaimTime(t) {
+  if (!t) return '';
+  const [H, M] = t.split(':').map(Number);
+  if (isNaN(H)) return '';
+  const ampm = H >= 12 ? 'pm' : 'am';
+  const h12 = H % 12 || 12;
+  const hh = ampm === 'am' ? String(h12).padStart(2, '0') : String(h12);
+  return `${hh}.${String(M || 0).padStart(2, '0')}${ampm}`;
+}
+
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* Blok "Butiran Tuntutan" — ikut template rasmi */
+function buildButiran(dari, ke, tujuan, tol, ex) {
+  const L = [
+    'Dari :', dari, '',
+    'Ke :', ke, '',
+    'Tujuan :', tujuan, '',
+    'Layak tuntut :',
+    'Belanja Pelbagai :' + (ex.pelbagai > 0 ? ' RM' + ex.pelbagai.toFixed(2) : '')
+  ];
+  if (tol > 0)         L.push('Tol : RM' + tol.toFixed(2));
+  if (ex.parking > 0)  L.push('Parking Kereta = RM' + ex.parking.toFixed(2));
+  if (ex.hotel > 0)    L.push('Hotel = RM' + ex.hotel.toFixed(2));
+  return L.join('\n');
+}
+
+function claimTableHTML(rows) {
+  let h = '<table class="kt"><thead>'
+        + '<tr><th colspan="5">KENYATAAN TUNTUTAN</th></tr>'
+        + '<tr><th rowspan="2">Tarikh</th><th colspan="2">Waktu</th>'
+        + '<th rowspan="2">Butiran Tuntutan</th><th rowspan="2">Jarak<br/>(km)</th></tr>'
+        + '<tr><th>Bertolak</th><th>Tiba</th></tr>'
+        + '</thead><tbody>';
+  rows.forEach(r => {
+    h += '<tr>'
+       + `<td class="c">${esc(r.tarikh)}</td>`
+       + `<td class="c">${esc(r.bertolak)}</td>`
+       + `<td class="c">${esc(r.tiba)}</td>`
+       + `<td class="butiran">${esc(r.butiran)}</td>`
+       + `<td class="c">${esc(r.jarak)}</td>`
+       + '</tr>';
+  });
+  return h + '</tbody></table>';
 }
 
 function buildClaimData() {
   const dari = getAlamat('dari');
-  const ke = getAlamat('ke');
+  const ke   = getAlamat('ke');
   if (!dari || !ke) return null;
-  const jarak = parseFloat(document.getElementById('c-jarak').value) || 0;
+  const hasBalik = document.getElementById('c-balik-on').checked;
+  const tujuanP = gstr('c-tujuan-p') || gstr('f-title');
   return {
-    tujuan: document.getElementById('f-title').value.trim(),
-    dari, ke, jarak,
-    bertolakP: document.getElementById('c-bp').value,
-    tibaP: document.getElementById('c-tp').value,
-    bertolakB: document.getElementById('c-bb').value,
-    tibaB: document.getElementById('c-tb').value,
-    tollP: parseFloat(document.getElementById('c-toll-p').value)||0,
-    tollB: parseFloat(document.getElementById('c-toll-b').value)||0,
-    parking: parseFloat(document.getElementById('c-parking').value)||0,
-    hotel: parseFloat(document.getElementById('c-hotel').value)||0,
-    pelbagai: parseFloat(document.getElementById('c-pelbagai').value)||0,
-    tarikh: (document.getElementById('f-dt').value||td()).slice(0,10)
+    /* nama medan lama dikekalkan supaya rekod sedia ada terus berfungsi */
+    tujuan: tujuanP, tujuanP,
+    tujuanB: hasBalik ? (gstr('c-tujuan-b') || deriveTujuanBalik(tujuanP)) : '',
+    dari, ke,
+    dariB: hasBalik ? getAlamat('dari-b') : '',
+    keB:   hasBalik ? getAlamat('ke-b')   : '',
+    jarak:  gnum('c-jarak'),
+    jarakB: hasBalik ? gnum('c-jarak-b') : 0,
+    bertolakP: gstr('c-bp'), tibaP: gstr('c-tp'),
+    bertolakB: hasBalik ? gstr('c-bb') : '',
+    tibaB:     hasBalik ? gstr('c-tb') : '',
+    tollP: gnum('c-toll-p'),
+    tollB: hasBalik ? gnum('c-toll-b') : 0,
+    parking: gnum('c-parking'), hotel: gnum('c-hotel'), pelbagai: gnum('c-pelbagai'),
+    extraRow: gstr('c-extra-row') || 'b',
+    hasBalik,
+    tarikh: (gstr('f-dt') || td()).slice(0, 10)
   };
 }
 
 function generateClaim() {
-  const dari = getAlamat('dari');
-  const ke = getAlamat('ke');
-  const bpVal = document.getElementById('c-bp').value;
-  const tpVal = document.getElementById('c-tp').value;
-  if (!dari || !ke || !bpVal || !tpVal) {
-    toast('Sila lengkapkan lokasi dan waktu pergi', 'ti-alert-circle'); return;
-  }
-  const tujuan = document.getElementById('f-title').value.trim();
-  const dt = (document.getElementById('f-dt').value || td()).slice(0,10);
-  const jarak = parseFloat(document.getElementById('c-jarak').value) || 0;
-  const jarakTotal = jarak * 2;
-  const tollP = parseFloat(document.getElementById('c-toll-p').value)||0;
-  const tollB = parseFloat(document.getElementById('c-toll-b').value)||0;
-  const parking = parseFloat(document.getElementById('c-parking').value)||0;
-  const hotel = parseFloat(document.getElementById('c-hotel').value)||0;
-  const pelbagai = parseFloat(document.getElementById('c-pelbagai').value)||0;
+  const dariP = getAlamat('dari');
+  const keP   = getAlamat('ke');
+  if (!dariP || !keP) { toast('Sila isi alamat Dari dan Ke (Pergi)', 'ti-alert-circle'); return; }
+
+  const bp = gstr('c-bp'), tp = gstr('c-tp');
+  if (!bp || !tp) { toast('Sila isi waktu Bertolak dan Tiba (Pergi)', 'ti-alert-circle'); return; }
+
+  const hasBalik = document.getElementById('c-balik-on').checked;
+  const bb = gstr('c-bb'), tb = gstr('c-tb');
+  if (hasBalik && (!bb || !tb)) { toast('Sila isi waktu Bertolak dan Tiba (Balik)', 'ti-alert-circle'); return; }
+
+  const dt      = (gstr('f-dt') || td()).slice(0, 10);
+  const tarikh  = fmtClaimDate(dt);
+  const tujuanP = gstr('c-tujuan-p') || gstr('f-title') || 'Bertugas rasmi';
+  const tujuanB = gstr('c-tujuan-b') || deriveTujuanBalik(tujuanP);
+  const dariB   = hasBalik ? (getAlamat('dari-b') || keP)   : '';
+  const keB     = hasBalik ? (getAlamat('ke-b')   || dariP) : '';
+
+  const jarakP = gnum('c-jarak'), jarakB = hasBalik ? gnum('c-jarak-b') : 0;
+  const tollP  = gnum('c-toll-p'), tollB = hasBalik ? gnum('c-toll-b') : 0;
+  const parking = gnum('c-parking'), hotel = gnum('c-hotel'), pelbagai = gnum('c-pelbagai');
   const total = tollP + tollB + parking + hotel + pelbagai;
-  const bbVal = document.getElementById('c-bb').value;
-  const tbVal = document.getElementById('c-tb').value;
-  const hasBalik = bbVal && tbVal;
+  const jarakTotal = jarakP + jarakB;
 
-  document.getElementById('co-sub').textContent = `${fmtDate(dt)} · Jumlah: ${rmFmt(total)}`;
+  /* Perbelanjaan tambahan diletak pada satu baris sahaja */
+  const onBalik = hasBalik && gstr('c-extra-row') === 'b';
+  const exP = onBalik ? {parking:0, hotel:0, pelbagai:0} : {parking, hotel, pelbagai};
+  const exB = onBalik ? {parking, hotel, pelbagai}       : {parking:0, hotel:0, pelbagai:0};
 
-  // Pergi row
-  sv('p-tarikh', fmtDate(dt));
-  sv('p-bertolak', fmt12(bpVal));
-  sv('p-tiba', fmt12(tpVal));
-  sv('p-dari', dari);
-  sv('p-ke', ke);
-  sv('p-tujuan', tujuan ? `Bertugas rasmi — ${tujuan}` : 'Bertugas rasmi');
-  sv('p-jarak', jarak.toFixed(2)+' km');
-  document.getElementById('p-waktu').textContent = `${fmt12(bpVal)} → ${fmt12(tpVal)}`;
-  const pLayak = [];
-  if (tollP>0) pLayak.push(`Toll=RM${tollP.toFixed(2)}`);
-  if (parking>0) pLayak.push(`Parking=RM${parking.toFixed(2)}`);
-  if (hotel>0) pLayak.push(`Hotel=RM${hotel.toFixed(2)}`);
-  if (pelbagai>0) pLayak.push(`Belanja Pelbagai=RM${pelbagai.toFixed(2)}`);
-  sv('p-layak', pLayak.length ? pLayak.join('\n') : 'Belanja Pelbagai :');
-  document.getElementById('p-toll-r').style.display = tollP>0 ? 'flex' : 'none';
-  if (tollP>0) sv('p-toll', rmFmt(tollP));
-  document.getElementById('p-park-r').style.display = parking>0 ? 'flex' : 'none';
-  if (parking>0) sv('p-parking', rmFmt(parking));
-  document.getElementById('p-hotel-r').style.display = hotel>0 ? 'flex' : 'none';
-  if (hotel>0) sv('p-hotel', rmFmt(hotel));
-
-  // Balik row
-  const balikRow = document.getElementById('balik-row');
-  balikRow.style.display = hasBalik ? 'block' : 'none';
-  if (hasBalik) {
-    sv('b-tarikh', fmtDate(dt));
-    sv('b-bertolak', fmt12(bbVal));
-    sv('b-tiba', fmt12(tbVal));
-    sv('b-dari', ke);
-    sv('b-ke', dari);
-    sv('b-tujuan', tujuan ? `Selesai bertugas rasmi — ${tujuan}` : 'Selesai bertugas rasmi');
-    sv('b-jarak', jarak.toFixed(2)+' km');
-    document.getElementById('b-waktu').textContent = `${fmt12(bbVal)} → ${fmt12(tbVal)}`;
-    const bLayak = tollB>0 ? [`Toll=RM${tollB.toFixed(2)}`] : [];
-    sv('b-layak', bLayak.length ? bLayak.join('\n') : 'Belanja Pelbagai :');
-    document.getElementById('b-toll-r').style.display = tollB>0 ? 'flex' : 'none';
-    if (tollB>0) sv('b-toll', rmFmt(tollB));
-  }
-
-  // Summary
-  sv('sum-jarak', jarakTotal.toFixed(2)+' km');
-  const zc = v => { const el = arguments.callee; return v>0?'sum-val':'sum-val zero'; };
-  ['sum-tp','sum-tb','sum-park','sum-hotel','sum-pelb'].forEach((id,i) => {
-    const v = [tollP,tollB,parking,hotel,pelbagai][i];
-    document.getElementById(id).textContent = rmFmt(v);
-    document.getElementById(id).className = 'sum-val'+(v===0?' zero':'');
+  const rows = [{
+    tarikh,
+    bertolak: fmtClaimTime(bp),
+    tiba:     fmtClaimTime(tp),
+    butiran:  buildButiran(dariP, keP, tujuanP, tollP, exP),
+    jarak:    jarakP.toFixed(2) + ' km'
+  }];
+  if (hasBalik) rows.push({
+    tarikh,
+    bertolak: fmtClaimTime(bb),
+    tiba:     fmtClaimTime(tb),
+    butiran:  buildButiran(dariB, keB, tujuanB, tollB, exB),
+    jarak:    jarakB.toFixed(2) + ' km'
   });
+
+  document.getElementById('kt-host').innerHTML = claimTableHTML(rows);
+  document.getElementById('co-sub').textContent =
+    `${tarikh} · ${jarakTotal.toFixed(2)} km · Jumlah: ${rmFmt(total)}`;
+
+  /* Ringkasan */
+  sv('sum-jp', jarakP.toFixed(2) + ' km');
+  sv('sum-jb', hasBalik ? jarakB.toFixed(2) + ' km' : '—');
+  sv('sum-jarak', jarakTotal.toFixed(2) + ' km');
+  [['sum-tp',tollP],['sum-tb',tollB],['sum-park',parking],['sum-hotel',hotel],['sum-pelb',pelbagai]]
+    .forEach(([id, v]) => {
+      const el = document.getElementById(id);
+      el.textContent = rmFmt(v);
+      el.className = 'sum-val' + (v === 0 ? ' zero' : '');
+    });
   document.getElementById('sum-total').textContent = rmFmt(total);
 
-  // Build copy text
-  const lines = [
-    'KENYATAAN TUNTUTAN',
-    `Pegawai  : ${nama||'—'}`,
-    `Tarikh   : ${fmtDate(dt)}`,
-    '',
-    '--- PERGI ---',
-    `Tarikh   : ${fmtDate(dt)}`,
-    `Bertolak : ${fmt12(bpVal)}`,
-    `Tiba     : ${fmt12(tpVal)}`,
-    `Dari     : ${dari}`,
-    `Ke       : ${ke}`,
-    `Tujuan   : ${tujuan ? 'Bertugas rasmi — '+tujuan : 'Bertugas rasmi'}`,
-    `Jarak    : ${jarak.toFixed(2)} km`,
-    'Layak tuntut :',
-    tollP>0 ? `  Toll         : RM${tollP.toFixed(2)}` : null,
-    parking>0 ? `  Parking      : RM${parking.toFixed(2)}` : null,
-    hotel>0 ? `  Hotel        : RM${hotel.toFixed(2)}` : null,
-    pelbagai>0 ? `  Bel. Pelbagai: RM${pelbagai.toFixed(2)}` : null,
-  ];
-  if (hasBalik) {
-    lines.push('','--- BALIK ---',`Tarikh   : ${fmtDate(dt)}`,`Bertolak : ${fmt12(bbVal)}`,`Tiba     : ${fmt12(tbVal)}`,`Dari     : ${ke}`,`Ke       : ${dari}`,`Tujuan   : ${tujuan ? 'Selesai bertugas rasmi — '+tujuan : 'Selesai bertugas rasmi'}`,`Jarak    : ${jarak.toFixed(2)} km`,'Layak tuntut :',tollB>0?`  Toll (Balik) : RM${tollB.toFixed(2)}`:null);
-  }
-  lines.push('','=== RINGKASAN ===',`Jarak total   : ${jarakTotal.toFixed(2)} km`,`Toll (pergi)  : RM${tollP.toFixed(2)}`,`Toll (balik)  : RM${tollB.toFixed(2)}`,`Parking       : RM${parking.toFixed(2)}`,`Hotel         : RM${hotel.toFixed(2)}`,`Bel. pelbagai : RM${pelbagai.toFixed(2)}`,`JUMLAH        : RM${total.toFixed(2)}`);
-  claimText = lines.filter(l => l !== null && l !== undefined).join('\n');
+  /* Versi teks biasa */
+  const txt = ['KENYATAAN TUNTUTAN', '', `Tarikh : ${tarikh}`, ''];
+  rows.forEach((r, i) => {
+    txt.push(`--- ${i === 0 ? 'PERGI' : 'BALIK'} ---`);
+    txt.push(`Bertolak : ${r.bertolak}`);
+    txt.push(`Tiba     : ${r.tiba}`);
+    txt.push(`Jarak    : ${r.jarak}`);
+    txt.push('');
+    txt.push(r.butiran);
+    txt.push('');
+  });
+  txt.push('=== RINGKASAN ===',
+           `Jumlah jarak  : ${jarakTotal.toFixed(2)} km`,
+           `Tol (pergi)   : RM${tollP.toFixed(2)}`,
+           `Tol (balik)   : RM${tollB.toFixed(2)}`,
+           `Parking       : RM${parking.toFixed(2)}`,
+           `Hotel         : RM${hotel.toFixed(2)}`,
+           `Bel. pelbagai : RM${pelbagai.toFixed(2)}`,
+           `JUMLAH        : RM${total.toFixed(2)}`);
+  claimText = txt.join('\n');
 
-  document.getElementById('claim-out').classList.add('show');
-  document.getElementById('claim-out').scrollIntoView({behavior:'smooth', block:'start'});
-  toast('Tuntutan dijana — tekan Log Entry untuk simpan', 'ti-check');
+  const box = document.getElementById('claim-out');
+  box.classList.add('show');
+  box.scrollIntoView({behavior:'smooth', block:'start'});
+  toast('Tuntutan dijana — tekan Log entry untuk simpan', 'ti-check');
 }
 
 async function saveClaim(logId, data) {
   if (!sheetUrl || !connected) return;
   const payload = {
     action: 'addClaim', logId,
-    tarikh: data.tarikh, nama: data.nama, tujuan: data.tujuan,
-    dari: data.dari, ke: data.ke, jarak: data.jarak,
-    tollP: data.tollP, tollB: data.tollB, parking: data.parking,
-    hotel: data.hotel, pelbagai: data.pelbagai,
+    tarikh: data.tarikh,
+    tujuanP: data.tujuanP || data.tujuan, dari: data.dari, ke: data.ke,
+    jarak: data.jarak, bertolakP: data.bertolakP, tibaP: data.tibaP, tollP: data.tollP,
+    tujuanB: data.tujuanB, dariB: data.dariB, keB: data.keB,
+    jarakB: data.jarakB, bertolakB: data.bertolakB, tibaB: data.tibaB, tollB: data.tollB,
+    parking: data.parking, hotel: data.hotel, pelbagai: data.pelbagai,
     jumlah: data.tollP + data.tollB + data.parking + data.hotel + data.pelbagai,
-    bertolakP: data.bertolakP, tibaP: data.tibaP,
-    bertolakB: data.bertolakB, tibaB: data.tibaB
+    /* medan lama supaya Apps Script versi terdahulu tidak pecah */
+    tujuan: data.tujuanP || data.tujuan
   };
   try {
-    await fetch(sheetUrl, {method:'POST', mode:'no-cors', headers:{'Content-Type': 'text/plain'}, body:JSON.stringify(payload)});
+    await fetch(sheetUrl, {method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)});
     toast('Tuntutan disimpan ke sheet Tuntutan', 'ti-check');
   } catch(x) {}
 }
@@ -1880,13 +2034,62 @@ async function saveClaim(logId, data) {
 function copyClaim() {
   if (!claimText) { toast('Jana tuntutan dahulu', 'ti-alert-circle'); return; }
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(claimText).then(() => toast('Disalin!', 'ti-copy'));
-  } else {
-    const ta = document.createElement('textarea');
-    ta.value = claimText; document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    toast('Disalin!', 'ti-copy');
+    navigator.clipboard.writeText(claimText)
+      .then(() => toast('Teks disalin', 'ti-copy'))
+      .catch(() => legacyCopy(claimText));
+  } else legacyCopy(claimText);
+}
+
+function legacyCopy(txt) {
+  const ta = document.createElement('textarea');
+  ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  document.execCommand('copy'); document.body.removeChild(ta);
+  toast('Disalin', 'ti-copy');
+}
+
+/* Salin sebagai jadual sebenar — tampal ke Excel/Word kekal baris & kolum */
+async function copyClaimTable() {
+  const host = document.getElementById('kt-host');
+  if (!host || !host.innerHTML.trim()) { toast('Jana tuntutan dahulu', 'ti-alert-circle'); return; }
+  const htmlStr = '<meta charset="utf-8">' + host.innerHTML;
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html':  new Blob([htmlStr],  {type:'text/html'}),
+        'text/plain': new Blob([claimText], {type:'text/plain'})
+      })]);
+      toast('Jadual disalin — tampal ke Excel/Word', 'ti-copy');
+      return;
+    }
+    throw new Error('no ClipboardItem');
+  } catch(e) {
+    try {
+      const r = document.createRange(); r.selectNodeContents(host);
+      const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      document.execCommand('copy'); s.removeAllRanges();
+      toast('Jadual disalin', 'ti-copy');
+    } catch(e2) { legacyCopy(claimText); }
   }
+}
+
+function printClaim() {
+  const host = document.getElementById('kt-host');
+  if (!host || !host.innerHTML.trim()) { toast('Jana tuntutan dahulu', 'ti-alert-circle'); return; }
+  const w = window.open('', '_blank');
+  if (!w) { toast('Benarkan pop-up untuk cetak', 'ti-alert-circle'); return; }
+  w.document.write('<!doctype html><html lang="ms"><head><meta charset="utf-8">'
+    + '<title>Kenyataan Tuntutan</title><style>'
+    + '@page{size:A4;margin:14mm}'
+    + 'body{font-family:Arial,Helvetica,sans-serif;color:#000;margin:0}'
+    + 'table{width:100%;border-collapse:collapse;font-size:11px}'
+    + 'th,td{border:1px solid #000;padding:5px 7px;vertical-align:top}'
+    + 'thead th{background:#D6DCE4;text-align:center;vertical-align:middle;font-weight:700}'
+    + 'td.c{text-align:center;vertical-align:middle;white-space:nowrap}'
+    + 'td.butiran{white-space:pre-wrap;line-height:1.45}'
+    + '</style></head><body>' + host.innerHTML + '</body></html>');
+  w.document.close(); w.focus();
+  setTimeout(() => { try { w.print(); } catch(e) {} }, 350);
 }
 
 function shareClaimWA() {
@@ -1895,12 +2098,18 @@ function shareClaimWA() {
 }
 
 function resetClaimFields() {
-  ['c-jarak','c-bp','c-tp','c-bb','c-tb',
-   'c-toll-p','c-toll-b','c-parking','c-hotel','c-pelbagai'].forEach(id => {
+  ['c-jarak','c-jarak-b','c-tp','c-bb','c-tb','c-toll-p','c-toll-b',
+   'c-parking','c-hotel','c-pelbagai','c-tujuan-p','c-tujuan-b'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
-  document.getElementById('c-bp').value = '08:00';
-  document.getElementById('c-tb').value = '17:00';
+  const set = (id,v) => { const e=document.getElementById(id); if(e) e.value=v; };
+  set('c-bp','07:00'); set('c-bb','17:15'); set('c-extra-row','b');
+  tpSetDisp('c-bp','07:00'); tpSetDisp('c-bb','17:15');
+  tpSetDisp('c-tp',''); tpSetDisp('c-tb','');
+  const d1=document.getElementById('c-tp-disp'), d2=document.getElementById('c-tb-disp');
+  if (d1) d1.textContent='--:-- --';
+  if (d2) d2.textContent='--:-- --';
+  document.getElementById('kt-host').innerHTML = '';
   document.getElementById('claim-out').classList.remove('show');
   claimText = '';
   initAlamat();
@@ -2046,7 +2255,8 @@ function genSum() {
       try {
         const cd = JSON.parse(e.claimJson);
         const jml = cd.tollP + cd.tollB + cd.parking + cd.hotel + cd.pelbagai;
-        lines.push(`   Tuntutan: RM${jml.toFixed(2)} (${cd.dari} → ${cd.ke}, ${(cd.jarak*2).toFixed(2)}km)`);
+        const jkm = (parseFloat(cd.jarak)||0) + (cd.jarakB !== undefined ? (parseFloat(cd.jarakB)||0) : (parseFloat(cd.jarak)||0));
+        lines.push(`   Tuntutan: RM${jml.toFixed(2)} (${cd.dari} → ${cd.ke}, ${jkm.toFixed(2)}km)`);
       } catch(x) {}
     }
   });
@@ -2167,20 +2377,33 @@ function editEntry(id) {
   if (e.claimJson) {
     try {
       const cd = JSON.parse(e.claimJson);
-      /* Restore addresses to dropdown or custom textarea */
-      if (cd.dari) {
-        const darisKey = Object.keys(ALAMAT).find(k => ALAMAT[k] === cd.dari);
-        if (darisKey) { document.getElementById('c-dari-sel').value = darisKey; onAlamatChange('dari'); }
-        else { document.getElementById('c-dari-sel').value = 'lain'; onAlamatChange('dari'); document.getElementById('c-dari').value = cd.dari; }
-      }
-      if (cd.ke) {
-        const keKey = Object.keys(ALAMAT).find(k => ALAMAT[k] === cd.ke);
-        if (keKey) { document.getElementById('c-ke-sel').value = keKey; onAlamatChange('ke'); }
-        else { document.getElementById('c-ke-sel').value = 'lain'; onAlamatChange('ke'); document.getElementById('c-ke').value = cd.ke; }
-      }
-      document.getElementById('c-jarak').value = cd.jarak||'';
-      const bpVal = cd.bertolakP||'08:00';
-      const tbVal = cd.tibaB||'17:00';
+      /* Pulihkan alamat ke dropdown atau kotak teks bebas */
+      const restoreAlamat = (field, val, autoVal) => {
+        const sel = document.getElementById('c-' + field + '-sel');
+        const ta  = document.getElementById('c-' + field);
+        if (!sel || !val) return;
+        if (autoVal !== undefined && val === autoVal) { sel.value = 'auto'; onAlamatChange(field); return; }
+        const key = Object.keys(ALAMAT).find(k => ALAMAT[k] === val);
+        if (key) { sel.value = key; onAlamatChange(field); }
+        else { sel.value = 'lain'; onAlamatChange(field); ta.value = val; ta.style.display = 'block'; }
+      };
+      restoreAlamat('dari', cd.dari);
+      restoreAlamat('ke',   cd.ke);
+
+      /* Perjalanan balik */
+      const hadBalik = !!(cd.hasBalik || cd.bertolakB || cd.dariB || cd.jarakB);
+      const chkB = document.getElementById('c-balik-on');
+      if (chkB) { chkB.checked = hadBalik; toggleBalik(); }
+      restoreAlamat('dari-b', cd.dariB || cd.ke,   cd.ke);
+      restoreAlamat('ke-b',   cd.keB   || cd.dari, cd.dari);
+
+      document.getElementById('c-tujuan-p').value = cd.tujuanP || cd.tujuan || '';
+      document.getElementById('c-tujuan-b').value = cd.tujuanB || '';
+      document.getElementById('c-extra-row').value = cd.extraRow || 'b';
+      document.getElementById('c-jarak').value   = cd.jarak  || '';
+      document.getElementById('c-jarak-b').value = cd.jarakB || '';
+      const bpVal = cd.bertolakP||'07:00';
+      const tbVal = cd.tibaB||'';
       document.getElementById('c-bp').value = bpVal;
       document.getElementById('c-tp').value = cd.tibaP||'';
       document.getElementById('c-bb').value = cd.bertolakB||'';
@@ -3213,6 +3436,8 @@ async function gpsCalcDistance() {
     const data = await res.json();
     if (data.km) {
       document.getElementById('c-jarak').value = data.km;
+      const jb = document.getElementById('c-jarak-b');
+      if (jb && !jb.value) jb.value = data.km;
       const durTxt = data.mins ? ` · anggaran ${data.mins} minit` : '';
       gpsStatus(`✓ Jarak: ${data.km} km${durTxt} (pergi & balik: ${(data.km*2).toFixed(2)} km)`, 'ok');
       toast('Jarak dikira ✓', 'ti-check');
