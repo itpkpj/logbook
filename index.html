@@ -1592,10 +1592,69 @@ function getSheet(name) {
 function out(s) {
   return ContentService.createTextOutput(s)
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ═══════════════════════════════════════════════════════
+   JALANKAN SEKALI dari editor Apps Script:
+   pilih "siapkanTabTugasan" pada menu Run, kemudian klik Run.
+   Ia cipta tab "Tugasan" jika belum ada, atau baiki tab
+   sedia ada tanpa memadam sebarang data.
+   ═══════════════════════════════════════════════════════ */
+function siapkanTabTugasan() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName('Tugasan') || ss.insertSheet('Tugasan');
+  var h = ['ID','Tajuk Tugasan','Status','Keutamaan','Tarikh Akhir',
+           'Kategori','Nota','Sub-tugasan (JSON)','Dicipta','Selesai Pada'];
+
+  /* Jika baris 1 bukan header, selitkan baris baharu di atas data */
+  var b1 = sh.getLastRow() &gt; 0 ? sh.getRange(1,2).getValue() : '';
+  if (String(b1).toLowerCase().trim() !== 'tajuk tugasan' &amp;&amp; sh.getLastRow() &gt; 0) {
+    sh.insertRowBefore(1);
+  }
+  if (sh.getMaxColumns() &lt; 10) sh.insertColumnsAfter(sh.getMaxColumns(), 10 - sh.getMaxColumns());
+
+  sh.getRange(1,1,1,10).setValues([h])
+    .setBackground('#085041').setFontColor('#FFFFFF')
+    .setFontWeight('bold').setFontSize(11);
+  sh.setFrozenRows(1);
+  sh.setColumnWidths(1,10,[90,260,90,90,100,130,220,240,150,150]);
+
+  var n = Math.max(sh.getMaxRows() - 1, 1);
+  var rng = sh.getRange(2,1,n,10);
+  rng.setVerticalAlignment('top');
+  sh.getRange(2,7,n,2).setWrap(true);
+  sh.getRange(2,5,n,1).setNumberFormat('yyyy-mm-dd');
+
+  /* Dropdown — nilai mesti sama dengan yang dihantar oleh logbook */
+  sh.getRange(2,3,n,1).setDataValidation(SpreadsheetApp.newDataValidation()
+    .requireValueInList(['Belum','Selesai'], true).build());
+  sh.getRange(2,4,n,1).setDataValidation(SpreadsheetApp.newDataValidation()
+    .requireValueInList(['high','med','low'], true).build());
+
+  /* Warna automatik: hijau bila selesai, merah bila lewat tarikh akhir */
+  sh.setConditionalFormatRules([
+    SpreadsheetApp.newConditionalFormatRule()
+      .whenFormulaSatisfied('=$C2="Selesai"')
+      .setBackground('#E1F5EE').setFontColor('#085041')
+      .setRanges([rng]).build(),
+    SpreadsheetApp.newConditionalFormatRule()
+      .whenFormulaSatisfied('=AND($E2&lt;&gt;"", $E2&lt;TODAY(), $C2&lt;&gt;"Selesai")')
+      .setBackground('#FAECE7').setFontColor('#712B13')
+      .setRanges([rng]).build()
+  ]);
+
+  sh.activate();
+  try { SpreadsheetApp.getUi().alert('Tab "Tugasan" sudah siap \u2713'); } catch (e) {}
 }</div>
     <div style="background:var(--amber-bg);border:0.5px solid var(--amber-border);border-radius:8px;padding:10px 13px;margin:10px 0;font-size:12px;color:var(--amber-dark);line-height:1.8">
       ⚠️ <strong>Jika Sheet Log sudah wujud</strong> — tambah 3 kolum baharu secara manual:<br>
       Kolum K = <strong>OT Mula</strong> &nbsp;|&nbsp; Kolum L = <strong>OT Tamat</strong> &nbsp;|&nbsp; Kolum M = <strong>OT (jam)</strong>
+    </div>
+    <div style="background:var(--teal-bg);border:0.5px solid var(--teal-border);border-radius:8px;padding:10px 13px;margin:10px 0;font-size:12px;color:var(--teal-dark);line-height:1.8">
+      ✅ <strong>Tab Tugasan berasingan</strong> — dalam editor Apps Script, pilih fungsi
+      <strong>siapkanTabTugasan</strong> pada menu <em>Run</em>, kemudian klik <strong>Run</strong> sekali sahaja.<br>
+      Ia akan cipta tab <strong>Tugasan</strong> lengkap dengan header, dropdown Status &amp; Keutamaan,
+      dan warna automatik (hijau = selesai, merah = lewat). Data sedia ada tidak dipadam.
     </div>
     <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-top:10px;font-weight:600">⚠️ Deployment settings yang WAJIB betul:</p>
     <div style="background:var(--amber-bg);border:0.5px solid var(--amber-border);border-radius:8px;padding:10px 13px;margin:8px 0;font-size:12px;color:var(--amber-dark);line-height:1.8">
